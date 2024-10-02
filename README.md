@@ -196,6 +196,58 @@ We welcome contributions to improve the app! Here’s how you can contribute:
 
 ---
 
+## **Command Reference**
+
+Here’s a list of all the commands you’ll need to run the program from start to finish.
+
+| **Command**                           | **Description**                                                                                 |
+|---------------------------------------|-------------------------------------------------------------------------------------------------|
+| `git clone https://github.com/your-repo/stock-cli-app.git` | Clones the project repository to your local machine.                                |
+| `cd stock-cli-app`                    | Changes directory to the project folder.                                                        |
+| `pip install -r requirements.txt`     | Installs the Python dependencies (yfinance, pandas).                                             |
+| `python main.py`                      | Starts the CLI application.                                                                     |
+| **In-Application Commands**:          | **Once inside the app, use the following options**:                                              |
+| `1`                                   | Register a new user.                                                                            |
+| `2`                                   | Log in as an existing user.                                                                     |
+| `3`                                   | Exit the application.                                                                           |
+| **Main Menu Commands**:               | **Once logged in, use these commands to interact with the app**:                                 |
+| `1`                                   | View real-time stock quotes by entering a ticker symbol (e.g., `AAPL`).                          |
+| `2`                                   | View historical data of a stock by entering the ticker symbol and a date range.                  |
+| `3`                                   | View fundamental analysis of a stock by entering the ticker symbol (e.g., P/E ratio, Market Cap).|
+| `4`                                   | Add stocks to your portfolio by entering a ticker symbol and number of shares.                   |
+| `5`                                   | View your portfolio’s total value and holdings.                                                  |
+| `6`                                   | Save your information (user data and portfolio) to disk.                                         |
+| `7`                                   | Log out from your session.                                                                      |
+
+---
+
+## **Code Explanation Examples**
+
+This table contains explanations for key parts of the code. Use it to better understand how the app is structured and operates.
+
+| **Code Snippet**                                           | **Explanation**                                                                                                     |
+|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `load_users()`                                              | Loads all users from the `users.json` file. Returns an empty dictionary if the file doesn't exist.                   |
+| `save_users(users)`                                         | Saves the current list of users to the `users.json` file. Updates user portfolios, authentication, and preferences.  |
+| `register()`                                                | Handles user registration by asking for a username and password. Saves this information to the `users.json` file.    |
+| `login()`                                                   | Handles user login by verifying the username and password from `users.json`. Grants access to the main menu if valid.|
+| `get_stock_quote(ticker_symbol)`                            | Fetches the real-time stock price, daily highs, lows, and volume using `yfinance` for a given ticker symbol.         |
+| `get_historical_data(ticker_symbol, start_date, end_date)`  | Retrieves historical data (open, high, low, close, etc.) for a given stock between two dates using `yfinance`.       |
+| `get_fundamentals(ticker_symbol)`                           | Extracts financial data, such as the P/E ratio, market cap, and income statement from `yfinance`.                    |
+| `track_portfolio(portfolio)`                                | Calculates the total value of a user's portfolio by fetching the latest stock prices and multiplying by share count.  |
+| `add_to_portfolio(user, ticker_symbol, shares)`             | Adds stocks to the user's portfolio by appending the ticker symbol and number of shares. Saves the portfolio to disk. |
+| `view_portfolio(user)`                                      | Displays the user's portfolio, showing stock holdings, number of shares, and the current portfolio value.            |
+| `save_users(load_users())`                                  | Ensures that all user data, including portfolios, are saved to the `users.json` file when requested.                 |
+| `main_menu(user)`                                           | The primary menu that users interact with after logging in. Handles navigation between stock-related features.       |
+| `if __name__ == "__main__": main()`                         | The entry point of the application, which ensures the app runs only when executed directly as a script.              |
+
+---
+
+## **Installation**
+
+Follow the [Installation](#installation) instructions above to set up the app, and use the command reference table to navigate the program efficiently.
+
+---
 ## **Changelog**
 
 ### **Version 1.0.0**
