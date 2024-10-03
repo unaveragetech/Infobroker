@@ -9,7 +9,26 @@ CACHE_FILE = 'stock_cache.json'
 LOG_FILE = 'ticker_log.txt'
 FAILED_TICKERS_FILE = 'failed_tickers.txt'
 INCOMPLETE_TICKERS_FILE = 'incomplete_tickers.json'
+#-------------------------------------------------------------
+#
+### Table: Ticker Generation Queries
+#
+# | **Function Name**                     | **Description**                                                                                                 | **Full Function Code**                                                                                                                                                                                                                                                                                                                                                                                                                       | **Example Use Case**                                                                 |
+# |---------------------------------------|-------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+# | `generate_us_stock_ticker`           | Generates a random ticker for US stock exchanges with optional suffixes like `NYSE`, `NASDAQ`, and `US`.       | ```python\ndef generate_us_stock_ticker(min_length=1, max_length=4, prefix='', suffix='US', exclude_tickers=None, allowed_suffixes=['US', 'NYSE', 'NASDAQ']):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers, allowed_suffixes=allowed_suffixes)\n```                                                                                                                                               | For general US stocks (e.g., `AAPL`, `GOOG`).                                      |
+# | `generate_eu_stock_ticker`           | Generates a random ticker for European stock exchanges, using suffixes for specific exchanges like `.LSE`, `.FR`. | ```python\ndef generate_eu_stock_ticker(min_length=2, max_length=5, prefix='', suffix='', exclude_tickers=None, allowed_exchanges=['LSE', 'FR', 'DE']):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers, allowed_exchanges=allowed_exchanges)\n```                                                                                                                                                      | For European stocks (e.g., `HSBA.LSE`, `BNP.FR`).                                  |
+# | `generate_tech_stock_ticker`         | Generates ticker symbols for technology companies, usually 2-4 characters.                                    | ```python\ndef generate_tech_stock_ticker(min_length=2, max_length=4, prefix='', suffix='', exclude_tickers=None):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers)\n```                                                                                                                                                                                                                                  | Suitable for tech companies listed on US or global markets (e.g., `MSFT`, `GOOG`). |
+# | `generate_bond_ticker`                | Generates ticker symbols for bonds or fixed-income securities, using `.BOND` as a suffix.                      | ```python\ndef generate_bond_ticker(min_length=3, max_length=5, prefix='', suffix='BOND', exclude_tickers=None):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers)\n```                                                                                                                                                                                                                                     | For bond markets (e.g., `T10Y.BOND`).                                              |
+# | `generate_crypto_ticker`              | Generates ticker symbols for cryptocurrencies, usually 3-5 characters.                                         | ```python\ndef generate_crypto_ticker(min_length=3, max_length=5, prefix='', suffix='', exclude_tickers=None):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers)\n```                                                                                                                                                                                                                                      | For cryptocurrency tickers (e.g., `BTC`, `ETH`).                                  |
+# | `generate_health_stock_ticker`        | Generates ticker symbols for healthcare companies, commonly using 3-5 characters.                           | ```python\ndef generate_health_stock_ticker(min_length=3, max_length=5, prefix='', suffix='', exclude_tickers=None):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers)\n```                                                                                                                                                                                                                                | For healthcare stocks (e.g., `PFE`, `JNJ`).                                        |
+# | `generate_luxury_brand_ticker`        | Generates tickers for luxury goods companies, allowing for longer names and global exchanges like `.FR`, `.IT`. | ```python\ndef generate_luxury_brand_ticker(min_length=4, max_length=6, prefix='', suffix='', exclude_tickers=None, allowed_exchanges=['FR', 'IT']):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers, allowed_exchanges=allowed_exchanges)\n```                                                                                                                                                         | For luxury brands listed on international markets (e.g., `LVMH.FR`).               |
+# | `generate_energy_stock_ticker`        | Generates ticker symbols for energy companies, typically 3-5 characters, with suffix options like `.OIL`, `.GAS`. | ```python\ndef generate_energy_stock_ticker(min_length=3, max_length=5, prefix='', suffix='', exclude_tickers=None, allowed_suffixes=['OIL', 'GAS']):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers, allowed_suffixes=allowed_suffixes)\n```                                                                                                                                                        | For energy sector stocks (e.g., `XOM.OIL`, `BP.GAS`).                             |
+# | `generate_fintech_stock_ticker`      | Generates ticker symbols for fintech companies, typically 4-5 characters.                                    | ```python\ndef generate_fintech_stock_ticker(min_length=4, max_length=5, prefix='', suffix='', exclude_tickers=None):\n    return generate_random_ticker(min_length, max_length, prefix, suffix, exclude_tickers)\n```                                                                                                                                                                                                                              | For fintech stocks (e.g., `PYPL`, `SQ`).                                           |
+#
+#
+#--------------------------------------------------------------
 
+# Cache and logging functions
 def load_cache():
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, 'r') as f:
@@ -38,21 +57,73 @@ def save_failed_ticker(ticker):
     with open(FAILED_TICKERS_FILE, 'a') as f:
         f.write(f"{ticker}\n")
 
-def generate_random_ticker():
-    length = random.randint(2, 4)
-    return ''.join(random.choices(string.ascii_uppercase, k=length))
+def generate_random_ticker(min_length=1, max_length=7, prefix='', suffix='', 
+                           exclude_tickers=None, allowed_exchanges=None, 
+                           allowed_suffixes=None):
+    """
+    Generates a random ticker symbol based on specified criteria.
+    
+    Parameters:
+    - min_length: Minimum length of the ticker (default 1).
+    - max_length: Maximum length of the ticker (default 7).
+    - prefix: String prefix for the ticker (default '').
+    - suffix: String suffix for the ticker (default 'US').
+    - exclude_tickers: A set of tickers to exclude from generation (default None).
+    - allowed_exchanges: A list of allowed stock exchange codes (default None).
+    - allowed_suffixes: A list of allowed suffixes for ticker validation (default None).
+    
+    Returns:
+    - A valid ticker symbol as a string.
+    """
+    
+    # Load failed tickers to exclude from generation
+    excluded_tickers = exclude_tickers if exclude_tickers else set()
+    if os.path.exists(FAILED_TICKERS_FILE):
+        with open(FAILED_TICKERS_FILE, 'r') as f:
+            excluded_tickers.update(line.strip().upper() for line in f)
+    
+    # If specific suffixes are allowed, validate suffix
+    if allowed_suffixes and suffix not in allowed_suffixes:
+        suffix = random.choice(allowed_suffixes)
+    
+    while True:
+        # Generate random ticker of specified length
+        length = random.randint(min_length, max_length)
+        main_ticker = ''.join(random.choices(string.ascii_uppercase, k=length))
+        
+        # Construct the full ticker with prefix and suffix
+        full_ticker = f"{prefix}{main_ticker}{suffix}".upper()
+
+        # Check if the ticker meets exchange criteria (if any)
+        if allowed_exchanges:
+            exchange_code = random.choice(allowed_exchanges)
+            full_ticker = f"{full_ticker}.{exchange_code}"
+        
+        # Validate the ticker
+        if full_ticker not in excluded_tickers and is_valid_ticker(full_ticker):
+            return full_ticker
+
+
+def is_valid_ticker(ticker):
+    if len(ticker) < 1 or len(ticker) > 5:
+        return False
+    if not all(char.isupper() for char in ticker):
+        return False
+    return True
 
 def is_ticker_incomplete(ticker_data):
     important_fields = ['name', 'market_cap', 'sector', 'industry', 'exchange', 'currency', 'country', 'website']
     return any(ticker_data.get(field) in ['N/A', None] for field in important_fields)
 
+# Ticker management functions
 def validate_and_add_ticker(ticker):
     cache = load_cache()
     incomplete_tickers = load_incomplete_tickers()
+
     try:
         stock = yf.Ticker(ticker)
         info = stock.info
-        
+
         if info and 'symbol' in info:
             ticker_data = {
                 "name": info.get('longName', ticker),
@@ -66,14 +137,14 @@ def validate_and_add_ticker(ticker):
                 "viewed": False,
                 "last_updated": datetime.now().isoformat()
             }
-            
+
             if is_ticker_incomplete(ticker_data):
                 incomplete_tickers[ticker] = ticker_data
                 save_incomplete_tickers(incomplete_tickers)
                 log_ticker(ticker, "Incomplete data. Added to incomplete_tickers.json")
                 print(f"Incomplete data for ticker: {ticker}. Added to incomplete_tickers.json")
                 return False
-            
+
             cache[ticker] = ticker_data
             save_cache(cache)
             log_ticker(ticker, "Valid and added to cache")
@@ -127,7 +198,7 @@ def update_stock_cache_info():
         try:
             stock = yf.Ticker(ticker)
             info = stock.info
-            
+
             if info and 'symbol' in info:
                 ticker_data = {
                     "name": info.get('longName', ticker),
@@ -141,7 +212,7 @@ def update_stock_cache_info():
                     "viewed": cache[ticker].get('viewed', False),
                     "last_updated": datetime.now().isoformat()
                 }
-                
+
                 if any(value == 'N/A' for key, value in ticker_data.items() if key not in ['viewed', 'last_updated']):
                     incomplete_tickers[ticker] = ticker_data
                     del cache[ticker]
@@ -188,40 +259,38 @@ def attempt_fix_incomplete_tickers():
 
 def main():
     while True:
-        try:
-            print("\n--- Ticker Management System ---")
-            print("1. Find and add new tickers")
-            print("2. Update and fix cache")
-            print("3. Fix incomplete tickers")
-            print("4. View cache statistics")
-            print("5. Exit")
-            user_input = input("Enter your choice (1-5): ")
-            
-            if user_input == '1':
-                num_tickers = int(input("Enter the number of new tickers to find: "))
+        print("\n--- Ticker Management System ---")
+        print("1. Find and add new tickers")
+        print("2. Update and fix cache")
+        print("3. Fix incomplete tickers")
+        print("4. View cache statistics")
+        print("5. Exit")
+
+        user_input = input("Enter your choice (1-5): ").strip()
+
+        if user_input == '1':
+            try:
+                num_tickers = int(input("Enter the number of new tickers to find: ").strip())
                 if num_tickers < 0:
                     print("Please enter a positive number.")
                     continue
                 find_and_add_tickers(num_tickers)
-            elif user_input == '2':
-                update_stock_cache_info()
-            elif user_input == '3':
-                attempt_fix_incomplete_tickers()
-            elif user_input == '4':
-                cache = load_cache()
-                incomplete = load_incomplete_tickers()
-                print(f"Total tickers in cache: {len(cache)}")
-                print(f"Total incomplete tickers: {len(incomplete)}")
-                with open(FAILED_TICKERS_FILE, 'r') as f:
-                    failed_count = sum(1 for _ in f)
-                print(f"Total failed tickers: {failed_count}")
-            elif user_input == '5':
-                print("Exiting...")
-                break
-            else:
-                print("Invalid choice. Please enter a number between 1 and 5.")
-        except ValueError:
-            print("Please enter a valid number.")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+        elif user_input == '2':
+            update_stock_cache_info()
+        elif user_input == '3':
+            attempt_fix_incomplete_tickers()
+        elif user_input == '4':
+            cache = load_cache()
+            incomplete_tickers = load_incomplete_tickers()
+            print(f"Cache contains {len(cache)} valid tickers.")
+            print(f"There are {len(incomplete_tickers)} incomplete tickers.")
+        elif user_input == '5':
+            print("Exiting the program.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
