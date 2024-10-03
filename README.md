@@ -37,7 +37,7 @@ To set up the CLI app, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-repo/stock-cli-app.git
+   git clone https://github.com/unaveragetech/Infobroker.git
    cd stock-cli-app
    ```
 
@@ -50,7 +50,7 @@ To set up the CLI app, follow these steps:
 3. **Run the application**:
    To start the CLI app, run the main Python file:
    ```bash
-   python main.py
+   python tick.py-->python app.py
    ```
 
 ---
@@ -202,10 +202,10 @@ Here’s a list of all the commands you’ll need to run the program from start 
 
 | **Command**                           | **Description**                                                                                 |
 |---------------------------------------|-------------------------------------------------------------------------------------------------|
-| `git clone https://github.com/your-repo/stock-cli-app.git` | Clones the project repository to your local machine.                                |
-| `cd stock-cli-app`                    | Changes directory to the project folder.                                                        |
+| `git clone https://github.com/unaveragetech/Infobroker.git` | Clones the project repository to your local machine.                                |
+| `cd stock-stockbroker`                    | Changes directory to the project folder.                                                        |
 | `pip install -r requirements.txt`     | Installs the Python dependencies (yfinance, pandas).                                             |
-| `python main.py`                      | Starts the CLI application.                                                                     |
+| `python tick.py-->python app.py`                      | Starts the CLI application.                                                                     |
 | **In-Application Commands**:          | **Once inside the app, use the following options**:                                              |
 | `1`                                   | Register a new user.                                                                            |
 | `2`                                   | Log in as an existing user.                                                                     |
@@ -243,6 +243,43 @@ This table contains explanations for key parts of the code. Use it to better und
 
 ---
 
+
+---
+
+## Ticker Generation Functions
+
+This project includes several functions for generating random ticker symbols based on specified criteria. Below is a summary of the available functions:
+
+### Functions Overview
+
+| **Function Name**                     | **Description**                                                                                                 | **Example Use Case**                                                                 |
+|---------------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| `generate_us_stock_ticker`           | Generates a random ticker for US stock exchanges with optional suffixes like `NYSE`, `NASDAQ`, and `US`.       | For general US stocks (e.g., `AAPL`, `GOOG`).                                      |
+| `generate_eu_stock_ticker`           | Generates a random ticker for European stock exchanges, using suffixes for specific exchanges like `.LSE`, `.FR`. | For European stocks (e.g., `HSBA.LSE`, `BNP.FR`).                                  |
+| `generate_tech_stock_ticker`         | Generates ticker symbols for technology companies, usually 2-4 characters.                                    | Suitable for tech companies listed on US or global markets (e.g., `MSFT`, `GOOG`). |
+| `generate_bond_ticker`                | Generates ticker symbols for bonds or fixed-income securities, using `.BOND` as a suffix.                      | For bond markets (e.g., `T10Y.BOND`).                                              |
+| `generate_crypto_ticker`              | Generates ticker symbols for cryptocurrencies, usually 3-5 characters.                                         | For cryptocurrency tickers (e.g., `BTC`, `ETH`).                                  |
+| `generate_health_stock_ticker`        | Generates ticker symbols for healthcare companies, commonly using 3-5 characters.                           | For healthcare stocks (e.g., `PFE`, `JNJ`).                                        |
+| `generate_luxury_brand_ticker`        | Generates tickers for luxury goods companies, allowing for longer names and global exchanges like `.FR`, `.IT`. | For luxury brands listed on international markets (e.g., `LVMH.FR`).               |
+| `generate_energy_stock_ticker`        | Generates ticker symbols for energy companies, typically 3-5 characters, with suffix options like `.OIL`, `.GAS`. | For energy sector stocks (e.g., `XOM.OIL`, `BP.GAS`).                             |
+| `generate_fintech_stock_ticker`      | Generates ticker symbols for fintech companies, typically 4-5 characters.                                    | For fintech stocks (e.g., `PYPL`, `SQ`).                                           |
+
+### Example Function Code
+
+Here’s an example of how you might define one of these functions in the Tick.py around line "60" :
+
+```python
+def generate_us_stock_ticker(min_length=1, max_length=4, prefix='', suffix='US', 
+                              exclude_tickers=None, allowed_suffixes=['US', 'NYSE', 'NASDAQ']):
+    return generate_random_ticker(min_length, max_length, prefix, suffix, 
+                                   exclude_tickers, allowed_suffixes=allowed_suffixes)
+```
+
+### Usage
+
+You can call these functions to generate random ticker symbols based on your criteria. This feature can be particularly useful for testing, simulations, or demonstrations.
+
+---
 ## **Installation**
 
 Follow the [Installation](#installation) instructions above to set up the app, and use the command reference table to navigate the program efficiently.
