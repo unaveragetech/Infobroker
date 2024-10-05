@@ -3,30 +3,67 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
 from mplfinance.original_flavor import candlestick_ohlc
 import logging
 from concurrent.futures import ThreadPoolExecutor
+import os
+import json
+from datetime import datetime
+import plotly.graph_objs as go
+import plotly.express as px
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# ----------------------------- CACHING -----------------------------
+CACHE_FILE = "stock_cache.json"
+CACHE_EXPIRY_DAYS = 1  # Cache expires after 1 day
 
 @dataclass
 class StockData:
     ticker: str
     data: pd.DataFrame
 
+# Load cache from file
+def load_cache() -> dict:
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, 'r') as file:
+            return json.load(file)
+    return {}
+
+# Save cache to file
+def save_cache(cache: dict):
+    with open(CACHE_FILE, 'w') as file:
+        json.dump(cache, file)
+
+# Check if cached data is expired
+def is_cache_expired(cached_time: str) -> bool:
+    cached_time = datetime.strptime(cached_time, '%Y-%m-%d %H:%M:%S')
+    return (datetime.now() - cached_time).days > CACHE_EXPIRY_DAYS
+
 # ----------------------------- STOCK DATA FUNCTIONS -----------------------------
 
+# Fetch stock data with caching support
 def fetch_stock_data(ticker: str, period: str = "1y") -> Optional[StockData]:
+    cache = load_cache()
+    if ticker in cache and not is_cache_expired(cache[ticker]['last_updated']):
+        logger.info(f"Using cached data for {ticker}")
+        return StockData(ticker, pd.DataFrame(cache[ticker]['data']))
+    
     try:
         stock = yf.Ticker(ticker)
         data = stock.history(period=period)
         if data.empty:
             logger.warning(f"No data available for {ticker}")
             return None
+        cache[ticker] = {
+            'data': data.to_dict(),
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        save_cache(cache)
         return StockData(ticker, data)
     except Exception as e:
         logger.error(f"Error fetching data for {ticker}: {str(e)}")
@@ -55,6 +92,10 @@ def calculate_bollinger_bands(stock_data: StockData, window: int = 20) -> StockD
     stock_data.data['SMA'] = stock_data.data['Close'].rolling(window=window).mean()
     stock_data.data['Bollinger Upper'] = stock_data.data['SMA'] + (2 * stock_data.data['Close'].rolling(window=window).std())
     stock_data.data['Bollinger Lower'] = stock_data.data['SMA'] - (2 * stock_data.data['Close'].rolling(window=window).std())
+    return stock_data
+
+def calculate_vwap(stock_data: StockData) -> StockData:
+    stock_data.data['VWAP'] = (stock_data.data['Close'] * stock_data.data['Volume']).cumsum() / stock_data.data['Volume'].cumsum()
     return stock_data
 
 # ----------------------------- GRAPH PLOTTING FUNCTIONS -----------------------------
@@ -126,90 +167,59 @@ def plot_candlestick(stock_data: StockData):
     plt.grid()
     plt.show()
 
-# ----------------------------- CLI INTERFACE -----------------------------
+def plot_vwap(stock_data: StockData):
+    plt.figure(figsize=(10, 5))
+    plt.plot(stock_data.data['Close'], label=f'{stock_data.ticker} Closing Price', color='blue')
+    plt.plot(stock_data.data['VWAP'], label='VWAP', linestyle='--', color='green')
+    plt.title(f'{stock_data.ticker} Volume-Weighted Average Price (VWAP)')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
-def select_ticker() -> str:
-    return input("Enter the stock ticker symbol: ").upper()
+# ----------------------------- INTERACTIVE GRAPHS -----------------------------
 
-def select_period() -> str:
-    periods = {"1": "1mo", "2": "3mo", "3": "6mo", "4": "1y", "5": "2y", "6": "5y", "7": "10y", "8": "ytd", "9": "max"}
-    print("\nSelect a time period:")
-    for key, value in periods.items():
-        print(f"{key}. {value}")
-    choice = input("Enter your choice (1-9): ")
-    return periods.get(choice, "1y")
+def plot_interactive(stock_data: StockData):
+    fig = go.Figure()
+    fig.add_trace(go.Candlestick(
+        x=stock_data.data.index,
+        open=stock_data.data['Open'],
+        high=stock_data.data['High'],
+        low=stock_data.data['Low'],
+        close=stock_data.data['Close'],
+        name='Candlestick'
+    ))
+    fig.update_layout(
+        title=f"{stock_data.ticker} Interactive Candlestick",
+        xaxis_title="Date",
+        yaxis_title="Price",
+        xaxis_rangeslider_visible=False  # Hides the range slider
+    )
+    fig.show()
 
-def graph_menu():
-    while True:
-        print("\n--- Stock Graphing Menu ---")
-        ticker = select_ticker()
-        if not ticker:
-            logger.warning("No valid ticker selected.")
-            return
+# ----------------------------- MAIN FUNCTION -----------------------------
 
-        period = select_period()
-        stock_data = fetch_stock_data(ticker, period)
-        if not stock_data:
-            continue
+def main(ticker: str):
+    stock_data = fetch_stock_data(ticker)
+    if stock_data is None:
+        return
 
-        # Calculate different analyses concurrently
-        with ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(detect_trend, stock_data),
-                executor.submit(calculate_rsi, stock_data),
-                executor.submit(calculate_macd, stock_data),
-                executor.submit(calculate_bollinger_bands, stock_data)
-            ]
-            for future in futures:
-                stock_data = future.result()
+    stock_data = detect_trend(stock_data)
+    stock_data = calculate_rsi(stock_data)
+    stock_data = calculate_macd(stock_data)
+    stock_data = calculate_bollinger_bands(stock_data)
+    stock_data = calculate_vwap(stock_data)
 
-        print("\n--- Display Options ---")
-        print("1. Trend and Closing Price")
-        print("2. RSI (Relative Strength Index)")
-        print("3. MACD (Moving Average Convergence Divergence)")
-        print("4. Bollinger Bands")
-        print("5. Candlestick Chart")
-        choice = input("Enter the type of display you want (1-5): ")
+    # Plotting
+    plot_trend(stock_data)
+    plot_rsi(stock_data)
+    plot_macd(stock_data)
+    plot_bollinger_bands(stock_data)
+    plot_candlestick(stock_data)
+    plot_vwap(stock_data)
+    plot_interactive(stock_data)
 
-        plot_functions = {
-            '1': plot_trend,
-            '2': plot_rsi,
-            '3': plot_macd,
-            '4': plot_bollinger_bands,
-            '5': plot_candlestick
-        }
-
-        if choice in plot_functions:
-            plot_functions[choice](stock_data)
-        else:
-            logger.warning("Invalid choice. Please try again.")
-
-        if input("Would you like to graph another stock? (y/n): ").lower() != 'y':
-            break
-
-# ----------------------------- MAIN MENU -----------------------------
-
-def main_menu():
-    while True:
-        print("\n--- Main Menu ---")
-        print("1. View Stock Quotes")
-        print("2. Graph Stock Data")
-        print("3. Log Out")
-        choice = input("Enter your choice: ")
-        try:
-            if choice == '1':
-                # Existing functionality for stock quotes can go here
-                pass
-            elif choice == '2':
-                graph_menu()
-            elif choice == '3':
-                logger.info("Logging out...")
-                break
-            else:
-                logger.warning("Invalid choice. Please try again.")
-        except Exception as e:
-            logger.error(f"An error occurred: {str(e)}")
-
-# Entry point
 if __name__ == "__main__":
-    main_menu()
+    stock_ticker = input("Enter stock ticker: ")
+    main(stock_ticker)
