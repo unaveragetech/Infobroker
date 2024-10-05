@@ -2,19 +2,19 @@ import json
 import os
 import csv
 import yfinance as yf
-import requests
-from bs4 import BeautifulSoup
-import time
-import random
-import asyncio
 import aiohttp
 import aiofiles
 import logging
-from aiohttp import ClientSession, ClientTimeout
-from typing import Set
+import asyncio
+import random
 from datetime import datetime
+from typing import Set, List, Dict
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Configure logging
+# ---------------------------- Section 1: Configuration and Setup ----------------------------
+
+# Logging configuration
 logging.basicConfig(
     filename='stock_check.log',
     filemode='a',
@@ -24,45 +24,133 @@ logging.basicConfig(
 
 # Constants
 CACHE_FILE = 'stock_cache.json'
-LOG_FILE = 'ticker_log.txt'
-FAILED_TICKERS_FILE = 'failed_tickers.txt'
-INCOMPLETE_TICKERS_FILE = 'incomplete_tickers.json'
-CSV_OUTPUT_FILE = 'stock_symbols_check.csv'
+CSV_OUTPUT_FILE = 'stock_data_analysis.csv'
 OFFICIAL_LISTINGS_URLS = {
     'NASDAQ': 'https://ftp.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt',
     'NYSE': 'https://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt'
 }
-HEADERS_LIST = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
-    " Chrome/91.0.4472.124 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)"
-    " Version/14.0.3 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)"
-    " Chrome/91.0.4472.114 Safari/537.36",
-]
 
-# Load or initialize cache
+# ---------------------------- Section 2: Caching Functions ----------------------------
+
 def load_cache() -> dict:
+    """Load cached stock data from CACHE_FILE."""
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, 'r') as f:
-            return json.load(f)
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                logging.error("Cache file is corrupted. Initializing empty cache.")
+                return {}
     return {}
 
 def save_cache(data: dict):
+    """Save stock data to CACHE_FILE."""
     with open(CACHE_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def load_incomplete_tickers() -> dict:
-    if os.path.exists(INCOMPLETE_TICKERS_FILE):
-        with open(INCOMPLETE_TICKERS_FILE, 'r') as f:
-            return json.load(f)
-    return {}
+# ---------------------------- Section 3: Ticker Validation and Insights ----------------------------
 
-def save_incomplete_tickers(data: dict):
-    with open(INCOMPLETE_TICKERS_FILE, 'w') as f:
-        json.dump(data, f, indent=4)
+async def validate_ticker_yf(symbol: str) -> dict:
+    """
+    Validate ticker using yfinance and fetch detailed information and insights.
+    """
+    result = {
+        "symbol": symbol.upper(),
+        "status": "Unknown",
+        "valid": False,
+        "company": "N/A",
+        "sector": "N/A",
+        "marketCap": "N/A",
+        "price": "N/A",
+        "pe_ratio": "N/A",
+        "dividend_yield": "N/A",
+        "moving_average_50": "N/A",
+        "moving_average_200": "N/A",
+        "rsi": "N/A",
+        "macd_line": "N/A",
+        "signal_line": "N/A",
+        "macd_histogram": "N/A"
+    }
+    
+    try:
+        stock = yf.Ticker(symbol)
+        info = stock.info
+        
+        # Check if symbol exists
+        if 'symbol' in info and info['symbol'].upper() == symbol.upper():
+            result["status"] = "Valid"
+            result["valid"] = True
+            result["company"] = info.get("longName", "N/A")
+            result["sector"] = info.get("sector", "N/A")
+            result["marketCap"] = info.get("marketCap", "N/A")
+            
+            # Fetch price
+            hist = stock.history(period="1d")
+            if not hist.empty:
+                result["price"] = round(hist['Close'].iloc[-1], 2)
+            
+            # P/E Ratio
+            result["pe_ratio"] = info.get("trailingPE", "N/A")
+            
+            # Dividend Yield
+            dividend_yield = info.get("dividendYield", "N/A")
+            if dividend_yield != "N/A":
+                result["dividend_yield"] = round(dividend_yield * 100, 2)  # Convert to percentage
+            
+            # Moving Averages
+            hist_50 = stock.history(period="50d")
+            hist_200 = stock.history(period="200d")
+            if not hist_50.empty:
+                result["moving_average_50"] = round(hist_50['Close'].mean(), 2)
+            if not hist_200.empty:
+                result["moving_average_200"] = round(hist_200['Close'].mean(), 2)
+            
+            # RSI and MACD
+            hist_full = stock.history(period="6mo")
+            if not hist_full.empty:
+                result["rsi"] = calculate_rsi(hist_full['Close'])
+                macd = calculate_macd(hist_full['Close'])
+                result["macd_line"] = round(macd['macd_line'], 2)
+                result["signal_line"] = round(macd['signal_line'], 2)
+                result["macd_histogram"] = round(macd['histogram'], 2)
+        else:
+            result["status"] = "Invalid"
+    except Exception as e:
+        logging.error(f"yfinance error for {symbol}: {e}")
+        result["status"] = "Error"
+    
+    return result
 
-async def fetch_official_listings() -> Set[str]:
+def calculate_rsi(prices: pd.Series, period: int = 14) -> float:
+    """Calculate the Relative Strength Index (RSI) based on price history."""
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    if not rsi.empty:
+        return round(rsi.iloc[-1], 2)
+    return "N/A"
+
+def calculate_macd(prices: pd.Series, short_period: int = 12, long_period: int = 26, signal_period: int = 9) -> dict:
+    """Calculate MACD (Moving Average Convergence Divergence) indicator."""
+    short_ema = prices.ewm(span=short_period, adjust=False).mean()
+    long_ema = prices.ewm(span=long_period, adjust=False).mean()
+    macd_line = short_ema - long_ema
+    signal_line = macd_line.ewm(span=signal_period, adjust=False).mean()
+    macd_histogram = macd_line - signal_line
+    return {
+        "macd_line": macd_line.iloc[-1],
+        "signal_line": signal_line.iloc[-1],
+        "histogram": macd_histogram.iloc[-1]
+    }
+
+# ---------------------------- Section 4: Data Fetching ----------------------------
+
+async def fetch_listing_symbols() -> Set[str]:
+    """
+    Fetch official stock symbols from NASDAQ and NYSE.
+    """
     symbols = set()
     async with aiohttp.ClientSession() as session:
         for exchange, url in OFFICIAL_LISTINGS_URLS.items():
@@ -76,161 +164,240 @@ async def fetch_official_listings() -> Set[str]:
                         if symbol and symbol != 'Symbol':
                             symbols.add(symbol.upper())
             except Exception as e:
-                logging.error(f"Error fetching listings from {exchange}: {e}")
+                logging.error(f"Error fetching {exchange} symbols: {e}")
     return symbols
 
-def is_valid_ticker(ticker: str) -> bool:
-    return 1 <= len(ticker) <= 7 and ticker.isupper() and ticker.isalpha()
-
-async def check_stock_symbol_yf(symbol: str) -> str:
-    try:
-        stock = yf.Ticker(symbol)
-        info = stock.info
-        if 'symbol' in info and info['symbol'].upper() == symbol.upper():
-            return f"Valid symbol. Company: {info.get('longName', 'N/A')}"
-        else:
-            return "Not a valid symbol"
-    except Exception as e:
-        logging.error(f"yfinance error for {symbol}: {e}")
-        return f"Error checking symbol: {str(e)}"
-
-async def fetch(session: ClientSession, url: str) -> str:
-    try:
-        async with session.get(url, timeout=ClientTimeout(total=10)) as response:
-            response.raise_for_status()
-            return await response.text()
-    except Exception as e:
-        logging.error(f"HTTP error fetching {url}: {e}")
-        return ""
-
-async def query_search_engine(session: ClientSession, stock_symbol: str, engine: str) -> str:
-    if engine.lower() == 'google':
-        url = f"https://www.google.com/search?q={stock_symbol}+stock"
-        result_div_class = 'BNeawe s3v9rd AP7Wnd'
-    elif engine.lower() == 'bing':
-        url = f"https://www.bing.com/search?q={stock_symbol}+stock"
-        result_div_class = 'b_snippet'
-    elif engine.lower() == 'yahoo':
-        url = f"https://finance.yahoo.com/quote/{stock_symbol}"
-        result_div_class = 'D(ib) Fz(18px)'
-    else:
-        return "Unsupported search engine"
-
-    headers = {
-        "User-Agent": random.choice(HEADERS_LIST),
-    }
-
-    try:
-        async with session.get(url, headers=headers, timeout=ClientTimeout(total=10)) as response:
-            response.raise_for_status()
-            text = await response.text()
-            soup = BeautifulSoup(text, 'html.parser')
-            result = soup.find('div', class_=result_div_class)
-            if result:
-                return result.get_text(strip=True)
-            else:
-                # Try alternative selectors
-                if engine.lower() == 'google':
-                    result = soup.find('div', class_='BNeawe iBp4i AP7Wnd')
-                elif engine.lower() == 'bing':
-                    result = soup.find('span', class_='b_algo')
-                elif engine.lower() == 'yahoo':
-                    result = soup.find('h1', {'data-reactid': '7'})
-                if result:
-                    return result.get_text(strip=True)
-                return "No information found"
-    except Exception as e:
-        logging.error(f"Error querying {engine} for {stock_symbol}: {e}")
-        return f"Error querying {engine}: {str(e)}"
-
-async def query_all_search_engines(session: ClientSession, stock_symbol: str) -> dict:
-    engines = ['Google', 'Bing', 'Yahoo']
-    tasks = [query_search_engine(session, stock_symbol, engine) for engine in engines]
-    responses = await asyncio.gather(*tasks, return_exceptions=True)
-    result = {}
-    for engine, response in zip(engines, responses):
-        if isinstance(response, Exception):
-            result[engine] = f"Error: {str(response)}"
-        else:
-            result[engine] = response
-    return result
+# ---------------------------- Section 5: CSV Handling ----------------------------
 
 async def write_csv_header():
-    async with aiofiles.open(CSV_OUTPUT_FILE, 'w', newline='', encoding='utf-8') as csvfile:
-        # Directly write the header to the CSV file
-        await csvfile.write('Symbol,Yahoo Finance Status,Google Response,Bing Response,Yahoo Finance Response\n')
+    """Write the header to the CSV output file."""
+    async with aiofiles.open(CSV_OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        header = 'Symbol,Company,Sector,MarketCap,Price,PE_Ratio,Dividend_Yield,MA50,MA200,RSI,MACD_Line,Signal_Line,MACD_Histogram,Status\n'
+        await f.write(header)
 
-async def write_csv_row(row: list):
-    async with aiofiles.open(CSV_OUTPUT_FILE, 'a', newline='', encoding='utf-8') as csvfile:
-        # Directly write the row to the CSV file
-        await csvfile.write(','.join(row) + '\n')
+async def write_csv_row(result: dict):
+    """Write a row of stock data to the CSV."""
+    async with aiofiles.open(CSV_OUTPUT_FILE, 'a', encoding='utf-8') as f:
+        row = [
+            result["symbol"],
+            f'"{result["company"]}"',  # Enclose in quotes in case of commas
+            result["sector"],
+            result["marketCap"],
+            result["price"],
+            result["pe_ratio"],
+            result["dividend_yield"],
+            result["moving_average_50"],
+            result["moving_average_200"],
+            result["rsi"],
+            result["macd_line"],
+            result["signal_line"],
+            result["macd_histogram"],
+            result["status"]
+        ]
+        await f.write(','.join(map(str, row)) + '\n')
 
-async def check_symbol(session: ClientSession, symbol: str, official_symbols: Set[str], cache: dict):
-    logging.info(f"Checking symbol: {symbol}")
-    yf_response = await check_stock_symbol_yf(symbol)
+# ---------------------------- Section 6: Processing Symbols ----------------------------
 
-    if "Valid symbol" not in yf_response and symbol in official_symbols:
-        search_responses = await query_all_search_engines(session, symbol)
-    else:
-        search_responses = {'Google': 'N/A', 'Bing': 'N/A', 'Yahoo': 'N/A'}
-
-    # Update cache
-    cache[symbol] = {
-        'yfinance': yf_response,
-        'google': search_responses.get('Google', ''),
-        'bing': search_responses.get('Bing', ''),
-        'yahoo_finance': search_responses.get('Yahoo', ''),
-        'last_checked': datetime.now().isoformat()
-    }
-
-    # Write to CSV
-    row = [
-        symbol,
-        yf_response,
-        search_responses.get('Google', ''),
-        search_responses.get('Bing', ''),
-        search_responses.get('Yahoo', '')
-    ]
-    await write_csv_row(row)
-
-    # Random delay to mimic human behavior and avoid rate limiting
-    await asyncio.sleep(random.uniform(1, 3))
-
-async def main():
-    # Load data
-    cache = load_cache()
-    incomplete_tickers = load_incomplete_tickers()
-
-    # Fetch official listings
-    official_symbols = await fetch_official_listings()
-    logging.info(f"Fetched {len(official_symbols)} official symbols.")
-
-    # Prepare CSV
-    await write_csv_header()
-
-    # Initialize aiohttp session
-    timeout = ClientTimeout(total=15)
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        tasks = []
-        for symbol in incomplete_tickers.keys():
-            if symbol not in cache:
-                tasks.append(check_symbol(session, symbol, official_symbols, cache))
-        
-        # Limit concurrency to prevent overwhelming the system and being blocked
-        semaphore = asyncio.Semaphore(10)
-
-        async def sem_task(task):
-            async with semaphore:
-                await task
-
-        await asyncio.gather(*[sem_task(task) for task in tasks])
-
-    # Save updated cache
+async def process_symbol(symbol: str, cache: dict):
+    """Process and validate a single stock symbol."""
+    if symbol in cache:
+        logging.info(f"{symbol} already in cache. Skipping.")
+        return
+    result = await validate_ticker_yf(symbol)
+    cache[symbol] = result
     save_cache(cache)
-    save_incomplete_tickers(incomplete_tickers)
+    await write_csv_row(result)
 
-    logging.info("CSV file has been created: stock_symbols_check.csv")
-    print("CSV file has been created: stock_symbols_check.csv")
+# ---------------------------- Section 7: CLI Interface ----------------------------
+
+def display_stock_info(stock_info: dict):
+    """Display detailed stock information."""
+    print(f"\n--- {stock_info['symbol']} ---")
+    print(f"Company: {stock_info['company']}")
+    print(f"Sector: {stock_info['sector']}")
+    print(f"Market Cap: {stock_info['marketCap']}")
+    print(f"Current Price: ${stock_info['price']}")
+    print(f"P/E Ratio: {stock_info['pe_ratio']}")
+    print(f"Dividend Yield: {stock_info['dividend_yield']}%")
+    print(f"50-Day Moving Average: ${stock_info['moving_average_50']}")
+    print(f"200-Day Moving Average: ${stock_info['moving_average_200']}")
+    print(f"RSI: {stock_info['rsi']}")
+    print(f"MACD Line: {stock_info['macd_line']}")
+    print(f"Signal Line: {stock_info['signal_line']}")
+    print(f"MACD Histogram: {stock_info['macd_histogram']}")
+    print(f"Status: {stock_info['status']}\n")
+
+def plot_stock_data(stock_info: dict):
+    """Generate and display plots for the stock."""
+    symbol = stock_info['symbol']
+    stock = yf.Ticker(symbol)
+    hist = stock.history(period="1y")
+    
+    if hist.empty:
+        print(f"No historical data available for {symbol}.")
+        return
+    
+    # Plot Closing Price with Moving Averages
+    plt.figure(figsize=(14, 7))
+    plt.plot(hist['Close'], label='Closing Price', color='blue')
+    if stock_info['moving_average_50'] != "N/A":
+        plt.plot(hist['Close'].rolling(window=50).mean(), label='50-Day MA', color='red')
+    if stock_info['moving_average_200'] != "N/A":
+        plt.plot(hist['Close'].rolling(window=200).mean(), label='200-Day MA', color='green')
+    plt.title(f"{symbol} Closing Price and Moving Averages")
+    plt.xlabel("Date")
+    plt.ylabel("Price ($)")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
+    # Plot RSI
+    plt.figure(figsize=(10, 4))
+    prices = hist['Close']
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    plt.plot(rsi, label='RSI', color='purple')
+    plt.axhline(70, color='red', linestyle='--', label='Overbought')
+    plt.axhline(30, color='green', linestyle='--', label='Oversold')
+    plt.title(f"{symbol} Relative Strength Index (RSI)")
+    plt.xlabel("Date")
+    plt.ylabel("RSI")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
+    # Plot MACD
+    plt.figure(figsize=(14, 7))
+    short_ema = prices.ewm(span=12, adjust=False).mean()
+    long_ema = prices.ewm(span=26, adjust=False).mean()
+    macd = short_ema - long_ema
+    signal = macd.ewm(span=9, adjust=False).mean()
+    histogram = macd - signal
+    plt.plot(macd, label='MACD', color='blue')
+    plt.plot(signal, label='Signal Line', color='red')
+    plt.bar(hist.index, histogram, label='Histogram', color='grey')
+    plt.title(f"{symbol} MACD")
+    plt.xlabel("Date")
+    plt.ylabel("MACD")
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+def display_menu():
+    """Display the main menu options."""
+    print("\n--- Automated Information (ai.py) ---")
+    print("1. Validate and Fetch Stock Data")
+    print("2. View Cached Stock Information")
+    print("3. Generate Stock Graphs")
+    print("4. Exit")
+
+def display_cached_symbols(cache: dict):
+    """Display all cached stock symbols."""
+    if not cache:
+        print("No cached stock data available.")
+        return
+    print("\n--- Cached Stock Symbols ---")
+    for i, symbol in enumerate(cache.keys(), start=1):
+        print(f"{i}. {symbol}")
+    print()
+
+def select_symbols_from_cache(cache: dict) -> List[str]:
+    """Allow user to select symbols from the cache."""
+    if not cache:
+        print("No cached stock data available.")
+        return []
+    
+    symbols = list(cache.keys())
+    display_cached_symbols(cache)
+    
+    selection = input("Enter the numbers of the stocks you want to select (comma-separated, e.g., 1,3,5): ")
+    try:
+        indices = [int(x.strip()) - 1 for x in selection.split(',')]
+        selected_symbols = [symbols[i] for i in indices if 0 <= i < len(symbols)]
+        if not selected_symbols:
+            print("No valid symbols selected.")
+        return selected_symbols
+    except Exception as e:
+        print("Invalid input. Please enter numbers separated by commas.")
+        return []
+
+def main_menu_actions(cache: dict):
+    """Handle user actions based on menu selection."""
+    while True:
+        display_menu()
+        choice = input("Enter your choice: ").strip()
+        
+        if choice == '1':
+            asyncio.run(validate_and_fetch(cache))
+        elif choice == '2':
+            display_cached_symbols(cache)
+        elif choice == '3':
+            selected_symbols = select_symbols_from_cache(cache)
+            for symbol in selected_symbols:
+                if symbol in cache:
+                    display_stock_info(cache[symbol])
+                    plot_stock_data(cache[symbol])
+                else:
+                    print(f"Symbol {symbol} not found in cache.")
+        elif choice == '4':
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# ---------------------------- Section 8: Validation and Fetching ----------------------------
+
+async def validate_and_fetch(cache: dict):
+    """Validate and fetch data for all symbols in cache or fetch new symbols."""
+    # Fetch official symbols
+    official_symbols = await fetch_listing_symbols()
+    logging.info(f"Fetched {len(official_symbols)} official symbols.")
+    
+    # Prompt user to add new symbols or process existing cache
+    print("\nDo you want to add new symbols to validate?")
+    add_new = input("Enter 'y' to add new symbols, any other key to skip: ").lower()
+    
+    if add_new == 'y':
+        new_symbols = input("Enter stock symbols separated by commas (e.g., AAPL, MSFT, GOOGL): ").upper()
+        symbols = [sym.strip() for sym in new_symbols.split(',') if sym.strip()]
+        for sym in symbols:
+            if sym not in official_symbols:
+                print(f"{sym} is not in the official listings. Skipping.")
+                logging.warning(f"{sym} is not in the official listings.")
+            else:
+                if sym not in cache:
+                    cache[sym] = {}  # Placeholder to mark as pending
+    else:
+        print("Skipping adding new symbols.")
+    
+    save_cache(cache)
+    
+    # Write CSV header if not exists
+    if not os.path.exists(CSV_OUTPUT_FILE):
+        await write_csv_header()
+    
+    # Process symbols concurrently
+    tasks = []
+    for symbol in official_symbols:
+        if symbol not in cache or not cache[symbol].get('valid', False):
+            tasks.append(process_symbol(symbol, cache))
+    
+    if tasks:
+        print(f"Processing {len(tasks)} symbols. This may take a while...")
+        await asyncio.gather(*tasks)
+        print("Processing complete.")
+    else:
+        print("All symbols in cache are already validated and up-to-date.")
+
+# ---------------------------- Section 9: Entry Point ----------------------------
+
+def main():
+    """Main entry point to run the CLI."""
+    cache = load_cache()
+    main_menu_actions(cache)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
