@@ -229,14 +229,14 @@ def view_portfolio(user):
 def main_menu(user):
     while True:
         print("\n--- Main Menu ---")
-        print("1. View Stock Quotes")
-        print("2. Historical Data")
-        print("3. Fundamentals")
-        print("4. Add to Portfolio")
-        print("5. View Portfolio")
-        print("6. Browse Stock Symbols")
-        print("7. Save Information")
-        print("8. Log Out")
+        print("1. View Stock Quotes: Get real-time stock prices and quotes.")
+        print("2. Historical Data: Retrieve historical price data for analysis.")
+        print("3. Fundamentals: Access detailed financial information about a stock.")
+        print("4. Add to Portfolio: Add a stock to your investment portfolio.")
+        print("5. View Portfolio: Review your current investments and their performance.")
+        print("6. Browse Stock Symbols: Search for stock symbols and their details.")
+        print("7. Save Information: Save your portfolio and stock information.")
+        print("8. Log Out: Exit the application.")
         choice = input("Enter your choice: ")
         try:
             if choice == '1':
