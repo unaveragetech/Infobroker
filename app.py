@@ -161,13 +161,24 @@ def get_fundamentals(ticker_symbol):
     stock = yf.Ticker(ticker_symbol)
     try:
         fundamentals = {
+            'Company Name': stock.info.get('longName', 'N/A'),
+            'Sector': stock.info.get('sector', 'N/A'),
             'Income Statement': stock.financials.to_dict() if not stock.financials.empty else "No data",
             'Balance Sheet': stock.balance_sheet.to_dict() if not stock.balance_sheet.empty else "No data",
             'Cash Flow': stock.cashflow.to_dict() if not stock.cashflow.empty else "No data",
             'PE Ratio': stock.info.get('trailingPE', 'N/A'),
             'EPS': stock.info.get('trailingEps', 'N/A'),
             'Dividend Yield': stock.info.get('dividendYield', 'N/A'),
-            'Market Cap': stock.info.get('marketCap', 'N/A')
+            'Market Cap': stock.info.get('marketCap', 'N/A'),
+            '52 Week High': stock.info.get('fiftyTwoWeekHigh', 'N/A'),
+            '52 Week Low': stock.info.get('fiftyTwoWeekLow', 'N/A'),
+            'Beta': stock.info.get('beta', 'N/A'),
+            'Last Dividend': stock.info.get('last_dividend_value', 'N/A'),
+            'Recent Performance': {
+                'Current Price': stock.info.get('currentPrice', 'N/A'),
+                'Price Change': stock.info.get('regularMarketChangePercent', 'N/A'),
+                'Volume': stock.info.get('volume', 'N/A')
+            }
         }
         mark_stock_as_viewed(ticker_symbol)
         return fundamentals
