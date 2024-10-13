@@ -222,32 +222,104 @@ This document serves as an extensive resource for major stock exchanges around t
 ## Full list
 <details>
 <summary>Click to view full list of exchanes </summary>
-```  
-## Comprehensive List of All Stock Exchanges
-  
-- **^NYA**: New York Stock Exchange (NYSE)
-- **^IXIC**: NASDAQ Stock Market
-- **^GSPTSE**: Toronto Stock Exchange (TSX)
-- **^MXX**: Mexican Stock Exchange (BMV)
-- **^CHX**: Chicago Stock Exchange (CHX)
-- **^FTSE**: London Stock Exchange (LSE)
-- **^DAX**: Deutsche Börse (Frankfurt Stock Exchange)
-- **^Euronext**: Euronext
-- **^SSMI**: SIX Swiss Exchange
-- **^FTSE MIB**: Borsa Italiana
-- **^N225**: Tokyo Stock Exchange (TSE)
-- **^SSE**: Shanghai Stock Exchange (SSE)
-- **^HSI**: Hong Kong Stock Exchange (HKEX)
-- **^NSEI**: National Stock Exchange of India (NSE)
-- **^KOSPI**: Korea Exchange (KRX)
-- **^AXJO**: Australian Securities Exchange (ASX)
-- **^NZX**: New Zealand Exchange (NZX)
-- **^JSE**: Johannesburg Stock Exchange (JSE)
-- **^NSE**: Nairobi Securities Exchange (NSE)
-- **^EGX30**: Egyptian Exchange (EGX)
-- **^MASI**: Casablanca Stock Exchange (CSE)
-- **^BOVESPA**: B3 (Brazil Stock Exchange)
-- **^BYMA**: Buenos Aires Stock Exchange (BCBA)
-- **^IPSA**: Santiago Stock Exchange (BCS)
-- **^S&P/BVL**: Lima Stock Exchange (BVL)
 ```
+- **^NYA**: New York Stock Exchange (NYSE)
+```
+
+```
+- **^IXIC**: NASDAQ Stock Market
+```
+
+```
+- **^GSPTSE**: Toronto Stock Exchange (TSX)
+```
+
+```
+- **^MXX**: Mexican Stock Exchange (BMV)
+```
+
+```
+- **^CHX**: Chicago Stock Exchange (CHX)
+```
+
+```
+- **^FTSE**: London Stock Exchange (LSE)
+```
+
+```
+- **^DAX**: Deutsche Börse (Frankfurt Stock Exchange)
+```
+
+```
+- **^Euronext**: Euronext
+```
+
+```
+- **^SSMI**: SIX Swiss Exchange
+```
+
+```
+- **^FTSE MIB**: Borsa Italiana
+```
+
+```
+- **^N225**: Tokyo Stock Exchange (TSE)
+```
+
+```
+- **^SSE**: Shanghai Stock Exchange (SSE)
+```
+
+```
+- **^HSI**: Hong Kong Stock Exchange (HKEX)
+```
+
+```
+- **^NSEI**: National Stock Exchange of India (NSE)
+```
+
+```
+- **^KOSPI**: Korea Exchange (KRX)
+```
+
+```
+- **^AXJO**: Australian Securities Exchange (ASX)
+```
+
+```
+- **^NZX**: New Zealand Exchange (NZX)
+```
+
+```
+- **^JSE**: Johannesburg Stock Exchange (JSE)
+```
+
+```
+- **^NSE**: Nairobi Securities Exchange (NSE)
+```
+
+```
+- **^EGX30**: Egyptian Exchange (EGX)
+```
+
+```
+- **^MASI**: Casablanca Stock Exchange (CSE)
+```
+
+```
+- **^BOVESPA**: B3 (Brazil Stock Exchange)
+```
+
+```
+- **^BYMA**: Buenos Aires Stock Exchange (BCBA)
+```
+
+```
+- **^IPSA**: Santiago Stock Exchange (BCS)
+```
+
+```
+- **^S&P/BVL**: Lima Stock Exchange (BVL)
+``` 
+
+
