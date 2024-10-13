@@ -222,8 +222,9 @@ This document serves as an extensive resource for major stock exchanges around t
 ## Full list
 <details>
 <summary>Click to view full list of exchanes </summary>
-  
+```  
 ## Comprehensive List of All Stock Exchanges
+  
 - **^NYA**: New York Stock Exchange (NYSE)
 - **^IXIC**: NASDAQ Stock Market
 - **^GSPTSE**: Toronto Stock Exchange (TSX)
@@ -249,5 +250,4 @@ This document serves as an extensive resource for major stock exchanges around t
 - **^BYMA**: Buenos Aires Stock Exchange (BCBA)
 - **^IPSA**: Santiago Stock Exchange (BCS)
 - **^S&P/BVL**: Lima Stock Exchange (BVL)
-
 ```
