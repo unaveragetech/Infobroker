@@ -24,17 +24,66 @@ def save_cache(data):
     with open(CACHE_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
+
+#---------------------------------------------------
+"""
+    Fetch stock symbols from the specified exchange.
+    
+    Parameters:
+    - exchange (str): The ticker symbol for the exchange. 
+      Default is "^IXIC" (NASDAQ).
+      
+    Other options include:
+    - "^GSPC": S&P 500
+    - "^DJI": Dow Jones Industrial Average
+    - "^RUT": Russell 2000
+    - "^FTSE": FTSE 100 (UK)
+    - "^N225": Nikkei 225 (Japan)
+    - "^HSI": Hang Seng Index (Hong Kong)
+    - "^AEX": AEX Index (Netherlands)
+    - "^DAX": DAX Index (Germany)
+    - "^IBEX": IBEX 35 (Spain)
+    - "^TSX": S&P/TSX Composite Index (Canada)
+    - "^BSESN": BSE Sensex (India)
+    
+    You can also use specific ETF tickers for broader market exposure, 
+    such as "SPY" for S&P 500 or "QQQ" for NASDAQ-100.
+
+    --def fetch_stock_symbols_from_exchange(Replace this below with an option above or from the exchange.txt file exchange=your replacement here):
+    """
+#----------------------------------------------------------
 def fetch_stock_symbols_from_exchange(exchange="^IXIC"):
     try:
-        nasdaq = yf.Ticker(exchange)
-        symbols = nasdaq.info.get('components', [])
+        # Fetching symbols based on the specified exchange
+        exchange_ticker = yf.Ticker(exchange)
+        symbols = exchange_ticker.info.get('components', [])
+
+        # If no symbols are found, fall back to a default list
         if not symbols:
             print("No symbols fetched from the exchange. Using a default list.")
-            symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V"]
+            symbols = get_default_symbols()
+        
         return symbols[:100]  # Limit to 100 symbols for demonstration
+    
     except Exception as e:
         print(f"Error fetching symbols: {e}")
-        return ["AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V"]
+        return get_default_symbols()
+
+def get_default_symbols():
+    # Default list of stock symbols
+    return [
+        "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA", "JPM", "JNJ", "V",
+        "BRK.B", "PG", "HD", "DIS", "PYPL", "NFLX", "CMCSA", "PEP", "INTC", "ADBE",
+        "VZ", "CSCO", "T", "NKE", "XOM", "MRK", "KO", "PFE", "TGT", "ABT",
+        "CVX", "WMT", "IBM", "CRM", "LLY", "PM", "TXN", "QCOM", "COST", "NVS",
+        "MDT", "HON", "LMT", "AVGO", "AMGN", "SBUX", "NOW", "AMAT", "LRCX", "CAT",
+        "UNH", "MO", "BKNG", "ADP", "SYK", "ANTM", "ISRG", "GILD", "CSX", "VRTX",
+        "ATVI", "FIS", "FISV", "ZTS", "MET", "DHR", "SPGI", "TROW", "MCO", "MSCI",
+        "CB", "ICE", "PNC", "USB", "NEM", "COP", "CARR", "KMB", "LNT", "SYF",
+        "RMD", "EXC", "WBA", "MMC", "TAP", "HIG", "PXD", "ADI", "PSA", "ETR",
+        "MDLZ", "DTE", "WDC", "LUMN", "NTRS", "HST", "FANG", "TTWO", "DLR", "O",
+        "REXR", "ZBRA", "MPC", "MLM", "VTRS", "SRE", "CBRE", "KEYS", "DOV", "FMC"
+    ]
 
 def update_cache_with_symbols(symbols):
     cache = load_cache()
