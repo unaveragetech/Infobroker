@@ -1,5 +1,31 @@
 # List of Major Stock Exchanges
 
+This document provides a comprehensive overview of major stock exchanges around the world, organized by continent. Each section contains details about individual exchanges, including their ticker symbols, locations, establishment years, and descriptions. This structured format allows for easy navigation through different geographical regions.
+
+## Notable Exchanges
+<details>
+<summary>Click to view notable exchanges</summary>
+
+- **Intercontinental Exchange (ICE)**
+  - **Ticker**: ^ICE
+  - **Location**: Atlanta, USA
+  - **Established**: 2000
+  - **Description**: An operator of global exchanges and clearing houses, known for trading in commodities and financial derivatives.
+
+- **CME Group**
+  - **Ticker**: ^CME
+  - **Location**: Chicago, USA
+  - **Established**: 1898
+  - **Description**: The world's largest financial derivatives exchange, offering a wide range of futures and options products.
+
+- **Singapore Exchange (SGX)**
+  - **Ticker**: ^STI
+  - **Location**: Singapore
+  - **Established**: 1999
+  - **Description**: A key financial hub in Asia, featuring a diverse range of international listings and trading products.
+
+</details>
+
 <details>
 <summary>North America</summary>
 
@@ -20,6 +46,18 @@
 - **Location**: Toronto, Canada
 - **Established**: 1861
 - **Description**: The largest stock exchange in Canada, featuring a diverse array of sectors, including mining, energy, and technology.
+
+## Mexican Stock Exchange (BMV)
+- **Ticker**: ^MXX
+- **Location**: Mexico City, Mexico
+- **Established**: 1894
+- **Description**: The main stock exchange in Mexico, offering a wide range of financial instruments.
+
+## Chicago Stock Exchange (CHX)
+- **Ticker**: ^CHX
+- **Location**: Chicago, USA
+- **Established**: 1882
+- **Description**: A smaller stock exchange focusing on the trading of securities, known for its efficiency and speed.
 
 </details>
 
@@ -50,6 +88,12 @@
 - **Established**: 1850
 - **Description**: Known for trading Swiss blue-chip stocks, offering a wide variety of investment products.
 
+## Borsa Italiana
+- **Ticker**: ^FTSE MIB
+- **Location**: Milan, Italy
+- **Established**: 1808
+- **Description**: The main stock exchange in Italy, featuring a wide array of domestic and international listings.
+
 </details>
 
 <details>
@@ -78,6 +122,12 @@
 - **Location**: Mumbai, India
 - **Established**: 1992
 - **Description**: One of the leading stock exchanges in India, known for its electronic trading platform and innovation in financial products.
+
+## Korea Exchange (KRX)
+- **Ticker**: ^KOSPI
+- **Location**: Busan, South Korea
+- **Established**: 1956
+- **Description**: The main stock exchange in South Korea, featuring a diverse range of companies.
 
 </details>
 
@@ -113,6 +163,18 @@
 - **Established**: 1954
 - **Description**: The leading stock exchange in East Africa, facilitating investment in local companies and promoting capital market growth.
 
+## Egyptian Exchange (EGX)
+- **Ticker**: ^EGX30
+- **Location**: Cairo, Egypt
+- **Established**: 1883
+- **Description**: One of the oldest stock exchanges in Africa, providing a platform for trading in a variety of securities.
+
+## Casablanca Stock Exchange (CSE)
+- **Ticker**: ^MASI
+- **Location**: Casablanca, Morocco
+- **Established**: 1929
+- **Description**: The primary stock exchange in Morocco, known for its diverse range of listed companies.
+
 </details>
 
 <details>
@@ -129,5 +191,17 @@
 - **Location**: Buenos Aires, Argentina
 - **Established**: 1854
 - **Description**: The primary stock exchange in Argentina, providing a platform for trading stocks, bonds, and other securities.
+
+## Santiago Stock Exchange (BCS)
+- **Ticker**: ^IPSA
+- **Location**: Santiago, Chile
+- **Established**: 1893
+- **Description**: The main stock exchange in Chile, known for trading in a variety of sectors, including mining and banking.
+
+## Lima Stock Exchange (BVL)
+- **Ticker**: ^S&P/BVL
+- **Location**: Lima, Peru
+- **Established**: 1860
+- **Description**: The main stock exchange in Peru, featuring a wide range of local and international companies.
 
 </details>
