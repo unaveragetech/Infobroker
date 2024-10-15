@@ -3,9 +3,11 @@
 
 The Stock Information CLI App is a command-line interface (CLI) application that allows users to register, log in, and access a wide range of stock data via the `yfinance` library. Users can view real-time stock quotes, check historical data, analyze fundamentals, manage portfolios, and set alerts. The app also allows saving and loading of user data for persistence across sessions.
 
-
-[See exchanges](Exchanges.md)
-
+<details>
+   <summary>
+[Stock exchanges are centralized marketplaces where securities, such as stocks, bonds, and other financial instruments, are bought and sold. They play a crucial role in the functioning of the financial markets, facilitating the trading of securities and providing a platform for companies to raise capital by issuing shares. Here’s an overview of their key features and functions]
+      (Exchanges.md)
+<summary>
 
 ## **Table of Contents**
 
