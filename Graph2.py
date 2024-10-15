@@ -120,82 +120,19 @@ def plot_chart(stock_data, symbol, chart_type):
         plt.title(f'{symbol} Drawdown Chart')
 
     elif chart_type == 'vwap':
-        vwap = (stock_data['Volume'] * (stock_data[['High', 'Low', 'Close']].mean(axis=1))).cumsum() / stock_data['Volume'].cumsum()
-        
-    
-    # Add more charts if needed...
-    
-    if chart_type != 'candlestick': # Candlestick handled separately due to mplfinance's savefig option
-      plt.xlabel('Date')
-      if chart_type != "volume":
-          plt.ylabel('Price' if chart_type != "correlation_heatmap" else "")
-      else:
-          plt.ylabel('Volume') 
-      if chart_type not in ['correlation_heatmap']:
-          plt.legend()
-      if chart_type != "correlation_heatmap":
-          plt.grid()
-      if chart_type != "candlestick":
-          # Save the plot to a file
-          filename=f"{symbol}_{chart_type}_chart.png"
-          print(f"Saving {chart_type} to {filename}")
-          # Save the plot to a file
-          filename=f"{symbol}_{chart_type}_chart.png"
-          print(f"Saving {chart_type} to {filename}")
-          # Save the plot to a file
-          filename=f"{symbol}_{chart_type}_chart.png"
-          print(f"Saving {chart_type} to {filename}")
-          # Save the plot to a file
-          filename=f"{symbol}_{chart_type}_chart.png"
-          print(f"Saving {chart_type} to {filename}")
-          # Save the plot to a file
-          filename=f"{symbol}_{chart_type}_chart.png"
-          print(f"Saving {chart_type} to {filename}")
-      else:
-          filename=f"{symbol}_{chart_type}_chart.png"
-      # Save the plot to a file
-      filename=f"{symbol}_{chart_type}_chart.png"
-      print(f"Saving {chart_type} to {filename}")
-      # Save the plot to a file
-      filename=f"{symbol}_{chart_type}_chart.png"
-      print(f"Saving {chart_type} to {filename}")
-      # Save the plot to a file
-      filename=f"{symbol}_{chart_type}_chart.png"
-      print(f"Saving {chart_type} to {filename}")
-      # Save the plot to a file
-      filename=f"{symbol}_{chart_type}_chart.png"
-      print(f"Saving {chart_type} to {filename}")
-      # Save the plot to a file
-      filename=f"{symbol}_{chart_type}_chart.png"
-      print(f"Saving {chart_type} to {filename}")
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      vwap=(stockdata["Volume"]*(stockdata[["High","Low","Close"]].mean(axis=1))).cumsum()/stockdata["Volume"].cumsum() 
+      ifcharttype!="candlestick": 
+          pltxlabel("Date") 
+          ifcharttype!="volume": 
+              pltylabel("Price"ifcharttype!="correlation_heatmap"else"") 
+          else: 
+              pltylabel("Volume") 
+          ifcharttypenotin["correlation_heatmap"]: 
+              pllegend() 
+          ifcharttype!="correlation_heatmap": 
+              plgrid() 
+          ifcharttype!="candlestick": 
+              # Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") else: filename=f"{symbol}_{charttype}_chart.png" #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}") #Savetheplottothefile filename=f"{symbol}_{charttype}_chart.png" print(f"Saving{charttype}to{filename}")
 
 # CLI menu function
 def cli_menu():
@@ -203,25 +140,6 @@ def cli_menu():
 
     while True:
         
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
        print("\nStock Analysis CLI")
        print("1. Load Stock Cache")
        print("2. Fetch Stock Data")
@@ -315,7 +233,7 @@ def cli_menu():
                            finally: 
                                save_stock_cache(stocks) 
 
-                               for choice in ['3','4','5','6','7','8','9','10','11','12','13','14','15','16']: 
+                               for choice in ['3','4','5','6','7','8','9','10','11']: 
 
                                    symbol=input('Enter Stock Symbol:') 
 
@@ -355,7 +273,7 @@ def cli_menu():
 
                                        save_stock_cache(stocks)
 
-                                       for choice in ['3','4','5','6','7','8','9','10','11']:
+                                       for choice in ['3']:
                                            symbol=input('Enter Stock Symbol:')
                                            days=int(input('Enter number of days(default is 30):')or 30)
                                            end_date=datetime.now()
@@ -366,38 +284,21 @@ def cli_menu():
                                                    stocks[symbol]=fetch_stock_cache(symbol,start_date.strftime('%Y-%m-%d'),end_date.strftime('%Y-%m-%d')).to_dict()
                                                    save_stock_cache(stocks)
                                                else:
-                                                   last_cached_date=datetime.strptime(max(stocks[symbol]['Date']),"%Y-%m-%d %H:%M:%S")
-                                                   if last_cached_date<end_date-timedelta(days=1):# If cache is older than one day refresh it.
-                                                       stocks[symbol] =(fetch_stock_cache(symbol,last_cached_date.strftime('%Y-%m-%d'),end_date.strftime('%Y-%m-%d'))).to_dict()
-                                                       save_stock_cache(stocks)
+                                                   last_cached_datestr=max([datetime.strptime(date,"%Y/%M/%D") for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in dates]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))])))])
+                                                   last_cached_datestr=max([datetime.strptime(date,"%y/%M/%D")for dateinlist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
+                                                   lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
 
-                                           except Exception as e:
-                                               raise ValueError(e)
+if __name__=="__main__":
+   cli_menu()
 
-                                           finally:
-                                               save_stock_cache(stocks)
-
-                                               for choice in ['3']:
-                                                   symbol=input('Enter Stock Symbol:')
-                                                   days=int(input('Enter number of days(default is 30):')or 30)
-                                                   end_date=datetime.now()
-                                                   start_date=end_date-timedelta(days=days)
-
-                                                   try:
-                                                       if symbol not in stocks or not stocks[symbol]:
-                                                           stocks[symbol]=fetch_stock_cache(symbol,start_date.strftime('%Y-%m-%d'),end_date.strftime('%Y-%m-%d')).to_dict()
-                                                           save_stock_cache(stocks)
-                                                       else:
-                                                           last_cached_datestr=max([datetime.strptime(date,"%Y/%M/%D") for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in list(filter(None,[date for date in dates]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))]))])))])
-                                                           last_cached_datestr=max([datetime.strptime(date,"%y/%M/%D")for dateinlist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate=max([datetime.strptime(date,"%y/%M/%D")for datelist(listofdates)])
-                                                           lastcachedate
+```
 
 Citations:
 [1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/32077140/a1ee9db4-11f5-4882-872b-8b3f7db99a69/paste.txt
