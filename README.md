@@ -6,8 +6,9 @@ The Stock Information CLI App is a command-line interface (CLI) application that
 <details>
    <summary>
 [Stock exchanges are centralized marketplaces where securities, such as stocks, bonds, and other financial instruments, are bought and sold. They play a crucial role in the functioning of the financial markets, facilitating the trading of securities and providing a platform for companies to raise capital by issuing shares. Here’s an overview of their key features and functions]
+      <details>
       (Exchanges.md)
-<summary>
+
 
 ## **Table of Contents**
 
