@@ -19,11 +19,15 @@ in current use will return this
 """
 No symbols fetched from the exchange. Using a default list.
 404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/ATVI?modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDomain=finance.yahoo.com&formatted=false&symbol=ATVI&crumb=ksfhJG9xSJs
-404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/PXD?modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDomain=finance.yahoo.com&formatted=false&symbol=PXD&crumb=ksfhJG9xSJs
-Added 100 stock symbols to the cache.
+404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/PXD?modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDoma
+in=finance.yahoo.com&formatted=false&symbol=PXD&crumb=ksfhJG9xSJs
+```
+Added 100 stock symbols to the cache.<not really added through this method
+```
 """
+```
 this is currently expected behaivior until a reliable alternitive is found the 100 stocks being added are in the cache or already found 
-
+```
 
 ## Notable Exchanges
 <details>
