@@ -1,225 +1,280 @@
-import yfinance as yf
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import numpy as np
-from typing import Optional, List
-from dataclasses import dataclass
-from mplfinance.original_flavor import candlestick_ohlc
-import logging
-from concurrent.futures import ThreadPoolExecutor
-import os
 import json
-from datetime import datetime
-import plotly.graph_objs as go
-import plotly.express as px
+import yfinance as yf
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from datetime import datetime, timedelta
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Load stock cache from JSON file
+def load_stock_cache(filename='stock_cache.json'):
+    with open(filename, 'r') as file:
+        stocks = json.load(file)
+    return stocks
 
-# ----------------------------- CACHING -----------------------------
-CACHE_FILE = "stock_cache.json"
-CACHE_EXPIRY_DAYS = 1  # Cache expires after 1 day
-
-@dataclass
-class StockData:
-    ticker: str
-    data: pd.DataFrame
-
-# Load cache from file
-def load_cache() -> dict:
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, 'r') as file:
-            return json.load(file)
-    return {}
-
-# Save cache to file
-def save_cache(cache: dict):
-    with open(CACHE_FILE, 'w') as file:
-        json.dump(cache, file)
-
-# Check if cached data is expired
-def is_cache_expired(cached_time: str) -> bool:
-    cached_time = datetime.strptime(cached_time, '%Y-%m-%d %H:%M:%S')
-    return (datetime.now() - cached_time).days > CACHE_EXPIRY_DAYS
-
-# ----------------------------- STOCK DATA FUNCTIONS -----------------------------
-
-# Fetch stock data with caching support
-def fetch_stock_data(ticker: str, period: str = "1y") -> Optional[StockData]:
-    cache = load_cache()
-    if ticker in cache and not is_cache_expired(cache[ticker]['last_updated']):
-        logger.info(f"Using cached data for {ticker}")
-        return StockData(ticker, pd.DataFrame(cache[ticker]['data']))
-    
-    try:
-        stock = yf.Ticker(ticker)
-        data = stock.history(period=period)
-        if data.empty:
-            logger.warning(f"No data available for {ticker}")
-            return None
-        cache[ticker] = {
-            'data': data.to_dict(),
-            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
-        save_cache(cache)
-        return StockData(ticker, data)
-    except Exception as e:
-        logger.error(f"Error fetching data for {ticker}: {str(e)}")
-        return None
-
-def detect_trend(stock_data: StockData) -> StockData:
-    stock_data.data['Trend'] = np.where(stock_data.data['Close'] > stock_data.data['Close'].shift(1), 'Positive', 'Negative')
+# Fetch stock data from yfinance
+def fetch_stock_data(symbol, start_date, end_date):
+    stock_data = yf.download(symbol, start=start_date, end=end_date)
     return stock_data
 
-def calculate_rsi(stock_data: StockData, window: int = 14) -> StockData:
-    delta = stock_data.data['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    stock_data.data['RSI'] = 100 - (100 / (1 + rs))
-    return stock_data
-
-def calculate_macd(stock_data: StockData, short_window: int = 12, long_window: int = 26, signal_window: int = 9) -> StockData:
-    stock_data.data['EMA_short'] = stock_data.data['Close'].ewm(span=short_window, adjust=False).mean()
-    stock_data.data['EMA_long'] = stock_data.data['Close'].ewm(span=long_window, adjust=False).mean()
-    stock_data.data['MACD'] = stock_data.data['EMA_short'] - stock_data.data['EMA_long']
-    stock_data.data['Signal Line'] = stock_data.data['MACD'].ewm(span=signal_window, adjust=False).mean()
-    return stock_data
-
-def calculate_bollinger_bands(stock_data: StockData, window: int = 20) -> StockData:
-    stock_data.data['SMA'] = stock_data.data['Close'].rolling(window=window).mean()
-    stock_data.data['Bollinger Upper'] = stock_data.data['SMA'] + (2 * stock_data.data['Close'].rolling(window=window).std())
-    stock_data.data['Bollinger Lower'] = stock_data.data['SMA'] - (2 * stock_data.data['Close'].rolling(window=window).std())
-    return stock_data
-
-def calculate_vwap(stock_data: StockData) -> StockData:
-    stock_data.data['VWAP'] = (stock_data.data['Close'] * stock_data.data['Volume']).cumsum() / stock_data.data['Volume'].cumsum()
-    return stock_data
-
-# ----------------------------- GRAPH PLOTTING FUNCTIONS -----------------------------
-
-def plot_trend(stock_data: StockData):
-    plt.figure(figsize=(14, 7))
-    plt.plot(stock_data.data['Close'], label=f'{stock_data.ticker} Closing Price', color='blue')
-    plt.fill_between(stock_data.data.index, stock_data.data['Close'], 
-                     color=np.where(stock_data.data['Trend'] == 'Positive', 'green', 'red'), alpha=0.1)
-    plt.title(f'{stock_data.ticker} Stock Price and Trend')
+# Generate various stock charts
+def line_chart(stock_data, symbol):
+    plt.figure(figsize=(10, 5))
+    plt.plot(stock_data['Close'], label='Close Price')
+    plt.title(f'{symbol} Line Chart')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig(f'{symbol}_line_chart.png')
+    plt.close()
 
-def plot_rsi(stock_data: StockData):
+def moving_average_chart(stock_data, symbol):
+    stock_data['MA50'] = stock_data['Close'].rolling(window=50).mean()
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data.data['RSI'], label=f'{stock_data.ticker} RSI', color='purple')
-    plt.axhline(70, color='red', linestyle='--', label='Overbought')
-    plt.axhline(30, color='green', linestyle='--', label='Oversold')
-    plt.title(f'{stock_data.ticker} Relative Strength Index (RSI)')
+    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['MA50'], label='50-Day MA', color='orange')
+    plt.title(f'{symbol} Moving Average Chart')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_moving_average_chart.png')
+    plt.close()
+
+def bollinger_bands_chart(stock_data, symbol):
+    stock_data['MA20'] = stock_data['Close'].rolling(window=20).mean()
+    stock_data['Upper'] = stock_data['MA20'] + (stock_data['Close'].rolling(window=20).std() * 2)
+    stock_data['Lower'] = stock_data['MA20'] - (stock_data['Close'].rolling(window=20).std() * 2)
+    plt.figure(figsize=(10, 5))
+    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['Upper'], label='Upper Band', linestyle='--', color='red')
+    plt.plot(stock_data['Lower'], label='Lower Band', linestyle='--', color='red')
+    plt.fill_between(stock_data.index, stock_data['Upper'], stock_data['Lower'], color='gray', alpha=0.1)
+    plt.title(f'{symbol} Bollinger Bands Chart')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_bollinger_bands_chart.png')
+    plt.close()
+
+def rsi_chart(stock_data, symbol):
+    delta = stock_data['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    
+    plt.figure(figsize=(10, 5))
+    plt.plot(rsi, label='RSI', color='purple')
+    plt.axhline(70, linestyle='--', color='red')
+    plt.axhline(30, linestyle='--', color='green')
+    plt.title(f'{symbol} RSI Chart')
     plt.xlabel('Date')
     plt.ylabel('RSI')
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig(f'{symbol}_rsi_chart.png')
+    plt.close()
 
-def plot_macd(stock_data: StockData):
+def candlestick_chart(stock_data, symbol):
+    import mplfinance as mpf
+    mpf.plot(stock_data, type='candle', volume=True, title=f'{symbol} Candlestick Chart', savefig=f'{symbol}_candlestick_chart.png')
+
+def volume_chart(stock_data, symbol):
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data.data['MACD'], label='MACD', color='blue')
-    plt.plot(stock_data.data['Signal Line'], label='Signal Line', color='red')
-    plt.fill_between(stock_data.data.index, stock_data.data['MACD'] - stock_data.data['Signal Line'], 
-                     color='gray', alpha=0.3, label='MACD - Signal')
-    plt.title(f'{stock_data.ticker} Moving Average Convergence Divergence (MACD)')
+    plt.bar(stock_data.index, stock_data['Volume'], color='blue')
+    plt.title(f'{symbol} Volume Chart')
     plt.xlabel('Date')
-    plt.ylabel('MACD')
-    plt.legend()
+    plt.ylabel('Volume')
     plt.grid()
-    plt.show()
+    plt.savefig(f'{symbol}_volume_chart.png')
+    plt.close()
 
-def plot_bollinger_bands(stock_data: StockData):
+def ema_chart(stock_data, symbol):
+    stock_data['EMA'] = stock_data['Close'].ewm(span=20, adjust=False).mean()
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data.data['Close'], label=f'{stock_data.ticker} Closing Price', color='blue')
-    plt.plot(stock_data.data['Bollinger Upper'], label='Upper Band', linestyle='--', color='orange')
-    plt.plot(stock_data.data['Bollinger Lower'], label='Lower Band', linestyle='--', color='orange')
-    plt.fill_between(stock_data.data.index, stock_data.data['Bollinger Lower'], 
-                     stock_data.data['Bollinger Upper'], color='gray', alpha=0.3)
-    plt.title(f'{stock_data.ticker} Bollinger Bands')
+    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['EMA'], label='20-Day EMA', color='orange')
+    plt.title(f'{symbol} EMA Chart')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig(f'{symbol}_ema_chart.png')
+    plt.close()
 
-def plot_candlestick(stock_data: StockData):
-    ohlc = stock_data.data[['Open', 'High', 'Low', 'Close']].copy()
-    ohlc['Date'] = mdates.date2num(stock_data.data.index)
-    ohlc = ohlc[['Date', 'Open', 'High', 'Low', 'Close']]
+def stochastic_oscillator_chart(stock_data, symbol):
+    stock_data['L14'] = stock_data['Low'].rolling(window=14).min()
+    stock_data['H14'] = stock_data['High'].rolling(window=14).max()
+    stock_data['%K'] = 100 * (stock_data['Close'] - stock_data['L14']) / (stock_data['H14'] - stock_data['L14'])
+    stock_data['%D'] = stock_data['%K'].rolling(window=3).mean()
     
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.xaxis_date()
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-    candlestick_ohlc(ax, ohlc.values, width=0.6, colorup='green', colordown='red', alpha=0.8)
-    
-    plt.title(f'{stock_data.ticker} Candlestick Chart')
-    plt.xlabel('Date')
-    plt.ylabel('Price')
-    plt.grid()
-    plt.show()
-
-def plot_vwap(stock_data: StockData):
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data.data['Close'], label=f'{stock_data.ticker} Closing Price', color='blue')
-    plt.plot(stock_data.data['VWAP'], label='VWAP', linestyle='--', color='green')
-    plt.title(f'{stock_data.ticker} Volume-Weighted Average Price (VWAP)')
+    plt.plot(stock_data['%K'], label='%K', color='blue')
+    plt.plot(stock_data['%D'], label='%D', color='orange')
+    plt.axhline(80, linestyle='--', color='red')
+    plt.axhline(20, linestyle='--', color='green')
+    plt.title(f'{symbol} Stochastic Oscillator Chart')
     plt.xlabel('Date')
-    plt.ylabel('Price')
+    plt.ylabel('Value')
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig(f'{symbol}_stochastic_oscillator_chart.png')
+    plt.close()
 
-# ----------------------------- INTERACTIVE GRAPHS -----------------------------
+def macd_chart(stock_data, symbol):
+    stock_data['EMA12'] = stock_data['Close'].ewm(span=12, adjust=False).mean()
+    stock_data['EMA26'] = stock_data['Close'].ewm(span=26, adjust=False).mean()
+    stock_data['MACD'] = stock_data['EMA12'] - stock_data['EMA26']
+    stock_data['Signal'] = stock_data['MACD'].ewm(span=9, adjust=False).mean()
 
-def plot_interactive(stock_data: StockData):
-    fig = go.Figure()
-    fig.add_trace(go.Candlestick(
-        x=stock_data.data.index,
-        open=stock_data.data['Open'],
-        high=stock_data.data['High'],
-        low=stock_data.data['Low'],
-        close=stock_data.data['Close'],
-        name='Candlestick'
-    ))
-    fig.update_layout(
-        title=f"{stock_data.ticker} Interactive Candlestick",
-        xaxis_title="Date",
-        yaxis_title="Price",
-        xaxis_rangeslider_visible=False  # Hides the range slider
-    )
-    fig.show()
+    plt.figure(figsize=(10, 5))
+    plt.plot(stock_data['MACD'], label='MACD', color='blue')
+    plt.plot(stock_data['Signal'], label='Signal Line', color='orange')
+    plt.title(f'{symbol} MACD Chart')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_macd_chart.png')
+    plt.close()
 
-# ----------------------------- MAIN FUNCTION -----------------------------
+def correlation_heatmap(stock_data, symbol):
+    correlation = stock_data.corr()
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation, annot=True, fmt='.2f', cmap='coolwarm', square=True)
+    plt.title(f'{symbol} Correlation Heatmap')
+    plt.savefig(f'{symbol}_correlation_heatmap.png')
+    plt.close()
 
-def main(ticker: str):
-    stock_data = fetch_stock_data(ticker)
-    if stock_data is None:
-        return
+def price_histogram(stock_data, symbol):
+    plt.figure(figsize=(10, 5))
+    plt.hist(stock_data['Close'], bins=20, color='blue', alpha=0.7)
+    plt.title(f'{symbol} Price Histogram')
+    plt.xlabel('Price')
+    plt.ylabel('Frequency')
+    plt.grid()
+    plt.savefig(f'{symbol}_price_histogram.png')
+    plt.close()
 
-    stock_data = detect_trend(stock_data)
-    stock_data = calculate_rsi(stock_data)
-    stock_data = calculate_macd(stock_data)
-    stock_data = calculate_bollinger_bands(stock_data)
-    stock_data = calculate_vwap(stock_data)
+def percentage_change_chart(stock_data, symbol):
+    percentage_change = stock_data['Close'].pct_change() * 100
+    plt.figure(figsize=(10, 5))
+    plt.plot(percentage_change, label='Percentage Change', color='blue')
+    plt.title(f'{symbol} Percentage Change Chart')
+    plt.xlabel('Date')
+    plt.ylabel('Percentage Change (%)')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_percentage_change_chart.png')
+    plt.close()
 
-    # Plotting
-    plot_trend(stock_data)
-    plot_rsi(stock_data)
-    plot_macd(stock_data)
-    plot_bollinger_bands(stock_data)
-    plot_candlestick(stock_data)
-    plot_vwap(stock_data)
-    plot_interactive(stock_data)
+def drawdown_chart(stock_data, symbol):
+    cumulative_return = (1 + stock_data['Close'].pct_change()).cumprod()
+    drawdown = (cumulative_return.cummax() - cumulative_return) / cumulative_return.cummax()
+    
+    plt.figure(figsize=(10, 5))
+    plt.plot(drawdown, label='Drawdown', color='purple')
+    plt.title(f'{symbol} Drawdown Chart')
+    plt.xlabel('Date')
+    plt.ylabel('Drawdown')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_drawdown_chart.png')
+    plt.close()
+
+def vwap_chart(stock_data, symbol):
+    vwap = (stock_data['Volume'] * (stock_data['High'] + stock_data['Low'] + stock_data['Close']) / 3).cumsum() / stock_data['Volume'].cumsum()
+    plt.figure(figsize=(10, 5))
+    plt.plot(vwap, label='VWAP', color='purple')
+    plt.title(f'{symbol} VWAP Chart')
+    plt.xlabel('Date')
+    plt.ylabel('VWAP')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'{symbol}_vwap_chart.png')
+    plt.close()
+
+# CLI menu function
+def cli_menu():
+    while True:
+        print("\nStock Analysis CLI")
+        print("1. Load Stock Cache")
+        print("2. Fetch Stock Data")
+        print("3. Generate Line Chart")
+        print("4. Generate Moving Average Chart")
+        print("5. Generate Bollinger Bands Chart")
+        print("6. Generate RSI Chart")
+        print("7. Generate Candlestick Chart")
+        print("8. Generate Volume Chart")
+        print("9. Generate EMA Chart")
+        print("10. Generate Stochastic Oscillator Chart")
+        print("11. Generate MACD Chart")
+        print("12. Generate Correlation Heatmap")
+        print("13. Generate Price Histogram")
+        print("14. Generate Percentage Change Chart")
+        print("15. Generate Drawdown Chart")
+        print("16. Generate VWAP Chart")
+        print("0. Exit")
+        
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            stocks = load_stock_cache()
+            print("Available stocks:")
+            for symbol in stocks:
+                print(symbol)
+
+        elif choice == '2':
+            symbol = input("Enter stock symbol: ")
+            days = int(input("Enter number of days to fetch data for (default is 30): ") or 30)
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+            stock_data = fetch_stock_data(symbol, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+            print(stock_data)
+
+        elif choice in ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']:
+            symbol = input("Enter stock symbol: ")
+            days = int(input("Enter number of days to fetch data for (default is 30): ") or 30)
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+            stock_data = fetch_stock_data(symbol, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+
+            if choice == '3':
+                line_chart(stock_data, symbol)
+            elif choice == '4':
+                moving_average_chart(stock_data, symbol)
+            elif choice == '5':
+                bollinger_bands_chart(stock_data, symbol)
+            elif choice == '6':
+                rsi_chart(stock_data, symbol)
+            elif choice == '7':
+                candlestick_chart(stock_data, symbol)
+            elif choice == '8':
+                volume_chart(stock_data, symbol)
+            elif choice == '9':
+                ema_chart(stock_data, symbol)
+            elif choice == '10':
+                stochastic_oscillator_chart(stock_data, symbol)
+            elif choice == '11':
+                macd_chart(stock_data, symbol)
+            elif choice == '12':
+                correlation_heatmap(stock_data, symbol)
+            elif choice == '13':
+                price_histogram(stock_data, symbol)
+            elif choice == '14':
+                percentage_change_chart(stock_data, symbol)
+            elif choice == '15':
+                drawdown_chart(stock_data, symbol)
+            elif choice == '16':
+                vwap_chart(stock_data, symbol)
+
+        elif choice == '0':
+            break
+        else:
+            print("Invalid option, please try again.")
 
 if __name__ == "__main__":
-    stock_ticker = input("Enter stock ticker: ")
-    main(stock_ticker)
+    cli_menu()
