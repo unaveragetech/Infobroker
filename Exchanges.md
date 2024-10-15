@@ -2,6 +2,29 @@
 
 This document serves as an extensive resource for major stock exchanges around the globe. Organized by continent, each section provides vital information about individual exchanges, including ticker symbols, locations, establishment years, and descriptions. Additionally, notable exchanges that play a significant role in the global financial landscape are highlighted. This structured format facilitates easy navigation through different geographical regions and enhances understanding of each exchange's importance in the world of finance.
 
+## Hows this needed 
+<details>
+<summary>Where is this used and why</summary>
+## Lines 28-87 explains this line of code this is a wip but will eventually keep a curated list of all exchanges 
+#----------------------------------------------------------
+def fetch_stock_symbols_from_exchange(exchange="^GSPC"):
+    try:
+        # Fetching symbols based on the specified exchange
+        exchange_ticker = yf.Ticker(exchange)
+        symbols = exchange_ticker.info.get('components', [])
+#----------------------------------------------------------
+
+in current use will return this 
+
+"""
+No symbols fetched from the exchange. Using a default list.
+404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/ATVI?modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDomain=finance.yahoo.com&formatted=false&symbol=ATVI&crumb=ksfhJG9xSJs
+404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/PXD?modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDomain=finance.yahoo.com&formatted=false&symbol=PXD&crumb=ksfhJG9xSJs
+Added 100 stock symbols to the cache.
+"""
+this is currently expected behaivior until a reliable alternitive is found the 100 stocks being added are in the cache or already found 
+
+
 ## Notable Exchanges
 <details>
 <summary>Click to view notable exchanges</summary>

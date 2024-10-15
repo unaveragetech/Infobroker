@@ -24,18 +24,67 @@ def save_cache(data):
     with open(CACHE_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def fetch_stock_symbols_from_exchange(exchange="^IXIC"):
+
+#---------------------------------------------------
+"""
+    Fetch stock symbols from the specified exchange.
+    
+    Parameters:
+    - exchange (str): The ticker symbol for the exchange. 
+      Default is "^IXIC" (NASDAQ).
+      
+    Other options include:
+    - "^GSPC": S&P 500
+    - "^DJI": Dow Jones Industrial Average
+    - "^RUT": Russell 2000
+    - "^FTSE": FTSE 100 (UK)
+    - "^N225": Nikkei 225 (Japan)
+    - "^HSI": Hang Seng Index (Hong Kong)
+    - "^AEX": AEX Index (Netherlands)
+    - "^DAX": DAX Index (Germany)
+    - "^IBEX": IBEX 35 (Spain)
+    - "^TSX": S&P/TSX Composite Index (Canada)
+    - "^BSESN": BSE Sensex (India)
+    
+    You can also use specific ETF tickers for broader market exposure, 
+    such as "SPY" for S&P 500 or "QQQ" for NASDAQ-100.
+
+    --def fetch_stock_symbols_from_exchange(Replace this below with an option above or from the exchange.txt file exchange=your replacement here):
+    """
+#----------------------------------------------------------
+def fetch_stock_symbols_from_exchange(exchange="^GSPC"):
     try:
-        nasdaq = yf.Ticker(exchange)
-        symbols = nasdaq.info.get('components', [])
+        # Fetching symbols based on the specified exchange
+        exchange_ticker = yf.Ticker(exchange)
+        symbols = exchange_ticker.info.get('components', [])
+
+        # If no symbols are found, fall back to a default list
         if not symbols:
             print("No symbols fetched from the exchange. Using a default list.")
-            symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V"]
+            symbols = get_default_symbols()
+        
         return symbols[:100]  # Limit to 100 symbols for demonstration
+    
     except Exception as e:
         print(f"Error fetching symbols: {e}")
-        return ["AAPL", "MSFT", "GOOGL", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V"]
+        return get_default_symbols()
 
+def get_default_symbols():
+    # Default list of stock symbols
+    return [
+        "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA", "JPM", "JNJ", "V",
+        "BRK.B", "PG", "HD", "DIS", "PYPL", "NFLX", "CMCSA", "PEP", "INTC", "ADBE",
+        "VZ", "CSCO", "T", "NKE", "XOM", "MRK", "KO", "PFE", "TGT", "ABT",
+        "CVX", "WMT", "IBM", "CRM", "LLY", "PM", "TXN", "QCOM", "COST", "NVS",
+        "MDT", "HON", "LMT", "AVGO", "AMGN", "SBUX", "NOW", "AMAT", "LRCX", "CAT",
+        "UNH", "MO", "BKNG", "ADP", "SYK", "ANTM", "ISRG", "GILD", "CSX", "VRTX",
+        "ATVI", "FIS", "FISV", "ZTS", "MET", "DHR", "SPGI", "TROW", "MCO", "MSCI",
+        "CB", "ICE", "PNC", "USB", "NEM", "COP", "CARR", "KMB", "LNT", "SYF",
+        "RMD", "EXC", "WBA", "MMC", "TAP", "HIG", "PXD", "ADI", "PSA", "ETR",
+        "MDLZ", "DTE", "WDC", "LUMN", "NTRS", "HST", "FANG", "TTWO", "DLR", "O",
+        "REXR", "ZBRA", "MPC", "MLM", "VTRS", "SRE", "CBRE", "KEYS", "DOV", "FMC"
+    ]
+#--------------------------------------------------------
 def update_cache_with_symbols(symbols):
     cache = load_cache()
     for symbol in symbols:
@@ -161,13 +210,24 @@ def get_fundamentals(ticker_symbol):
     stock = yf.Ticker(ticker_symbol)
     try:
         fundamentals = {
+            'Company Name': stock.info.get('longName', 'N/A'),
+            'Sector': stock.info.get('sector', 'N/A'),
             'Income Statement': stock.financials.to_dict() if not stock.financials.empty else "No data",
             'Balance Sheet': stock.balance_sheet.to_dict() if not stock.balance_sheet.empty else "No data",
             'Cash Flow': stock.cashflow.to_dict() if not stock.cashflow.empty else "No data",
             'PE Ratio': stock.info.get('trailingPE', 'N/A'),
             'EPS': stock.info.get('trailingEps', 'N/A'),
             'Dividend Yield': stock.info.get('dividendYield', 'N/A'),
-            'Market Cap': stock.info.get('marketCap', 'N/A')
+            'Market Cap': stock.info.get('marketCap', 'N/A'),
+            '52 Week High': stock.info.get('fiftyTwoWeekHigh', 'N/A'),
+            '52 Week Low': stock.info.get('fiftyTwoWeekLow', 'N/A'),
+            'Beta': stock.info.get('beta', 'N/A'),
+            'Last Dividend': stock.info.get('last_dividend_value', 'N/A'),
+            'Recent Performance': {
+                'Current Price': stock.info.get('currentPrice', 'N/A'),
+                'Price Change': stock.info.get('regularMarketChangePercent', 'N/A'),
+                'Volume': stock.info.get('volume', 'N/A')
+            }
         }
         mark_stock_as_viewed(ticker_symbol)
         return fundamentals
@@ -218,14 +278,14 @@ def view_portfolio(user):
 def main_menu(user):
     while True:
         print("\n--- Main Menu ---")
-        print("1. View Stock Quotes")
-        print("2. Historical Data")
-        print("3. Fundamentals")
-        print("4. Add to Portfolio")
-        print("5. View Portfolio")
-        print("6. Browse Stock Symbols")
-        print("7. Save Information")
-        print("8. Log Out")
+        print("1. View Stock Quotes: Get real-time stock prices and quotes.")
+        print("2. Historical Data: Retrieve historical price data for analysis.")
+        print("3. Fundamentals: Access detailed financial information about a stock.")
+        print("4. Add to Portfolio: Add a stock to your investment portfolio.")
+        print("5. View Portfolio: Review your current investments and their performance.")
+        print("6. Browse Stock Symbols: Search for stock symbols and their details.")
+        print("7. Save Information: Save your portfolio and stock information.")
+        print("8. Log Out: Exit the application.")
         choice = input("Enter your choice: ")
         try:
             if choice == '1':

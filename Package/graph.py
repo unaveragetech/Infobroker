@@ -197,28 +197,55 @@ def vwap_chart(stock_data, symbol):
     plt.savefig(f'{symbol}_vwap_chart.png')
     plt.close()
 
+# Function to serve educational links based on user's choice
+def serve_learning_link(option):
+    links = {
+        '1': None,  # No link needed for loading cache
+        '2': None,  # No link needed for fetching data
+        '3': "https://www.investopedia.com/terms/l/line-chart.asp",
+        '4': "https://www.investopedia.com/terms/m/movingaverage.asp",
+        '5': "https://www.investopedia.com/terms/b/bollingerbands.asp",
+        '6': "https://www.investopedia.com/terms/r/rsi.asp",
+        '7': "https://www.investopedia.com/terms/c/candlestick.asp",
+        '8': "https://www.investopedia.com/terms/v/volume.asp",
+        '9': "https://www.investopedia.com/terms/e/ema.asp",
+        '10': "https://www.investopedia.com/terms/s/stochasticoscillator.asp",
+        '11': "https://www.investopedia.com/terms/m/macd.asp",
+        '12': "https://www.investopedia.com/terms/c/correlation.asp",
+        '13': "https://www.investopedia.com/terms/h/histogram.asp",
+        '14': "https://www.investopedia.com/terms/p/percentage-change.asp",
+        '15': "https://www.investopedia.com/terms/d/drawdown.asp",
+        '16': "https://www.investopedia.com/terms/v/vwap.asp"
+    }
+    
+    link = links.get(option)
+    if link:
+        print(f"Learn more about this concept here: {link}")
+    else:
+        print("No learning link available for this option.")
+
 # CLI menu function
 def cli_menu():
     while True:
-        print("\nStock Analysis CLI")
-        print("1. Load Stock Cache")
-        print("2. Fetch Stock Data")
-        print("3. Generate Line Chart")
-        print("4. Generate Moving Average Chart")
-        print("5. Generate Bollinger Bands Chart")
-        print("6. Generate RSI Chart")
-        print("7. Generate Candlestick Chart")
-        print("8. Generate Volume Chart")
-        print("9. Generate EMA Chart")
-        print("10. Generate Stochastic Oscillator Chart")
-        print("11. Generate MACD Chart")
-        print("12. Generate Correlation Heatmap")
-        print("13. Generate Price Histogram")
-        print("14. Generate Percentage Change Chart")
-        print("15. Generate Drawdown Chart")
-        print("16. Generate VWAP Chart")
-        print("0. Exit")
-        
+        print("\nStock Analysis CLI - Choose an option for detailed analysis:")
+        print("1. Load Stock Cache - Load saved stock data from the cache for quicker access")
+        print("2. Fetch Stock Data - Retrieve fresh stock data from online sources")
+        print("3. Generate Line Chart - Create a simple line chart for stock price movements")
+        print("4. Generate Moving Average Chart - Visualize moving averages to smooth out stock data")
+        print("5. Generate Bollinger Bands Chart - Analyze price volatility using Bollinger Bands")
+        print("6. Generate RSI Chart - Measure stock momentum with a Relative Strength Index (RSI) chart")
+        print("7. Generate Candlestick Chart - View price action in detail using a candlestick chart")
+        print("8. Generate Volume Chart - Visualize the volume of shares traded over time")
+        print("9. Generate EMA Chart - Track price trends with an Exponential Moving Average (EMA) chart")
+        print("10. Generate Stochastic Oscillator Chart - Identify potential buy/sell signals with a stochastic oscillator")
+        print("11. Generate MACD Chart - Analyze trend reversals using a Moving Average Convergence Divergence (MACD) chart")
+        print("12. Generate Correlation Heatmap - Visualize correlations between different stock metrics")
+        print("13. Generate Price Histogram - Analyze stock price distribution with a price histogram")
+        print("14. Generate Percentage Change Chart - View percentage changes in stock prices over time")
+        print("15. Generate Drawdown Chart - Assess risk by visualizing drawdowns from peak stock prices")
+        print("16. Generate VWAP Chart - Analyze the Volume Weighted Average Price (VWAP) for trades")
+        print("0. Exit - Close the CLI application")
+
         choice = input("Choose an option: ")
 
         if choice == '1':
@@ -270,6 +297,9 @@ def cli_menu():
                 drawdown_chart(stock_data, symbol)
             elif choice == '16':
                 vwap_chart(stock_data, symbol)
+
+            # Serve the educational link based on the choice
+            serve_learning_link(choice)
 
         elif choice == '0':
             break
