@@ -8,8 +8,9 @@
         "exchange": "NMS",
         "country": "United States",
         "website": "https://www.apple.com",
-        "viewed": false,
-        "last_updated": "2024-10-03T00:23:02.645747"
+        "viewed": true,
+        "last_updated": "2024-10-03T00:23:02.645747",
+        "timestamp": "2024-11-04T20:20:01.702131"
     },
     "MSFT": {
         "name": "Microsoft Corporation",
@@ -680,8 +681,9 @@
         "exchange": "NYQ",
         "country": "United States",
         "website": "https://www.kennedywilson.com",
-        "viewed": false,
-        "last_updated": "2024-10-03T00:23:05.087152"
+        "viewed": true,
+        "last_updated": "2024-10-03T00:23:05.087152",
+        "timestamp": "2024-11-04T20:27:28.498957"
     },
     "ES": {
         "name": "Eversource Energy",
@@ -1270,5 +1272,621 @@
         "website": "https://fadv.com",
         "viewed": false,
         "last_updated": "2024-10-03T00:32:39.641779"
+    },
+    "BRK.B": {
+        "name": "BRK.B",
+        "market_cap": "N/A",
+        "sector": "N/A",
+        "industry": "N/A",
+        "viewed": false
+    },
+    "PG": {
+        "name": "The Procter & Gamble Company",
+        "market_cap": 388675796992,
+        "sector": "Consumer Defensive",
+        "industry": "Household & Personal Products",
+        "viewed": false
+    },
+    "HD": {
+        "name": "The Home Depot, Inc.",
+        "market_cap": 392906964992,
+        "sector": "Consumer Cyclical",
+        "industry": "Home Improvement Retail",
+        "viewed": false
+    },
+    "DIS": {
+        "name": "The Walt Disney Company",
+        "market_cap": 173197852672,
+        "sector": "Communication Services",
+        "industry": "Entertainment",
+        "viewed": false
+    },
+    "PYPL": {
+        "name": "PayPal Holdings, Inc.",
+        "market_cap": 78132953088,
+        "sector": "Financial Services",
+        "industry": "Credit Services",
+        "viewed": false
+    },
+    "NFLX": {
+        "name": "Netflix, Inc.",
+        "market_cap": 323731030016,
+        "sector": "Communication Services",
+        "industry": "Entertainment",
+        "viewed": false
+    },
+    "CMCSA": {
+        "name": "Comcast Corporation",
+        "market_cap": 162819276800,
+        "sector": "Communication Services",
+        "industry": "Telecom Services",
+        "viewed": false
+    },
+    "PEP": {
+        "name": "PepsiCo, Inc.",
+        "market_cap": 227709190144,
+        "sector": "Consumer Defensive",
+        "industry": "Beverages - Non-Alcoholic",
+        "viewed": false
+    },
+    "INTC": {
+        "name": "Intel Corporation",
+        "market_cap": 97086054400,
+        "sector": "Technology",
+        "industry": "Semiconductors",
+        "viewed": false
+    },
+    "ADBE": {
+        "name": "Adobe Inc.",
+        "market_cap": 212726644736,
+        "sector": "Technology",
+        "industry": "Software - Infrastructure",
+        "viewed": false
+    },
+    "VZ": {
+        "name": "Verizon Communications Inc.",
+        "market_cap": 172657967104,
+        "sector": "Communication Services",
+        "industry": "Telecom Services",
+        "viewed": false
+    },
+    "CSCO": {
+        "name": "Cisco Systems, Inc.",
+        "market_cap": 222160830464,
+        "sector": "Technology",
+        "industry": "Communication Equipment",
+        "viewed": false
+    },
+    "NKE": {
+        "name": "NIKE, Inc.",
+        "market_cap": 115239665664,
+        "sector": "Consumer Cyclical",
+        "industry": "Footwear & Accessories",
+        "viewed": false
+    },
+    "XOM": {
+        "name": "Exxon Mobil Corporation",
+        "market_cap": 520550809600,
+        "sector": "Energy",
+        "industry": "Oil & Gas Integrated",
+        "viewed": false
+    },
+    "MRK": {
+        "name": "Merck & Co., Inc.",
+        "market_cap": 257704263680,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "KO": {
+        "name": "The Coca-Cola Company",
+        "market_cap": 279920869376,
+        "sector": "Consumer Defensive",
+        "industry": "Beverages - Non-Alcoholic",
+        "viewed": false
+    },
+    "PFE": {
+        "name": "Pfizer Inc.",
+        "market_cap": 157590355968,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "TGT": {
+        "name": "Target Corporation",
+        "market_cap": 69331591168,
+        "sector": "Consumer Defensive",
+        "industry": "Discount Stores",
+        "viewed": false
+    },
+    "ABT": {
+        "name": "Abbott Laboratories",
+        "market_cap": 204831064064,
+        "sector": "Healthcare",
+        "industry": "Medical Devices",
+        "viewed": false
+    },
+    "CVX": {
+        "name": "Chevron Corporation",
+        "market_cap": 274171920384,
+        "sector": "Energy",
+        "industry": "Oil & Gas Integrated",
+        "viewed": false
+    },
+    "WMT": {
+        "name": "Walmart Inc.",
+        "market_cap": 663517331456,
+        "sector": "Consumer Defensive",
+        "industry": "Discount Stores",
+        "viewed": false
+    },
+    "IBM": {
+        "name": "International Business Machines Corporation",
+        "market_cap": 190754357248,
+        "sector": "Technology",
+        "industry": "Information Technology Services",
+        "viewed": false
+    },
+    "CRM": {
+        "name": "Salesforce, Inc.",
+        "market_cap": 286283759616,
+        "sector": "Technology",
+        "industry": "Software - Application",
+        "viewed": false
+    },
+    "LLY": {
+        "name": "Eli Lilly and Company",
+        "market_cap": 766006394880,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "PM": {
+        "name": "Philip Morris International Inc.",
+        "market_cap": 202330030080,
+        "sector": "Consumer Defensive",
+        "industry": "Tobacco",
+        "viewed": false
+    },
+    "TXN": {
+        "name": "Texas Instruments Incorporated",
+        "market_cap": 186603110400,
+        "sector": "Technology",
+        "industry": "Semiconductors",
+        "viewed": false
+    },
+    "QCOM": {
+        "name": "QUALCOMM Incorporated",
+        "market_cap": 184834883584,
+        "sector": "Technology",
+        "industry": "Semiconductors",
+        "viewed": false
+    },
+    "COST": {
+        "name": "Costco Wholesale Corporation",
+        "market_cap": 392102772736,
+        "sector": "Consumer Defensive",
+        "industry": "Discount Stores",
+        "viewed": false
+    },
+    "NVS": {
+        "name": "Novartis AG",
+        "market_cap": 223276875776,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "MDT": {
+        "name": "Medtronic plc",
+        "market_cap": 114664439808,
+        "sector": "Healthcare",
+        "industry": "Medical Devices",
+        "viewed": false
+    },
+    "HON": {
+        "name": "Honeywell International Inc.",
+        "market_cap": 134666149888,
+        "sector": "Industrials",
+        "industry": "Conglomerates",
+        "viewed": false
+    },
+    "LMT": {
+        "name": "Lockheed Martin Corporation",
+        "market_cap": 127767379968,
+        "sector": "Industrials",
+        "industry": "Aerospace & Defense",
+        "viewed": false
+    },
+    "AVGO": {
+        "name": "Broadcom Inc.",
+        "market_cap": 793671630848,
+        "sector": "Technology",
+        "industry": "Semiconductors",
+        "viewed": false
+    },
+    "AMGN": {
+        "name": "Amgen Inc.",
+        "market_cap": 169812049920,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "SBUX": {
+        "name": "Starbucks Corporation",
+        "market_cap": 109994844160,
+        "sector": "Consumer Cyclical",
+        "industry": "Restaurants",
+        "viewed": false
+    },
+    "NOW": {
+        "name": "ServiceNow, Inc.",
+        "market_cap": 197505187840,
+        "sector": "Technology",
+        "industry": "Software - Application",
+        "viewed": false
+    },
+    "AMAT": {
+        "name": "Applied Materials, Inc.",
+        "market_cap": 150486695936,
+        "sector": "Technology",
+        "industry": "Semiconductor Equipment & Materials",
+        "viewed": false
+    },
+    "LRCX": {
+        "name": "Lam Research Corporation",
+        "market_cap": 95590129664,
+        "sector": "Technology",
+        "industry": "Semiconductor Equipment & Materials",
+        "viewed": false
+    },
+    "CAT": {
+        "name": "Caterpillar Inc.",
+        "market_cap": 183005347840,
+        "sector": "Industrials",
+        "industry": "Farm & Heavy Construction Machinery",
+        "viewed": false
+    },
+    "UNH": {
+        "name": "UnitedHealth Group Incorporated",
+        "market_cap": 514556198912,
+        "sector": "Healthcare",
+        "industry": "Healthcare Plans",
+        "viewed": false
+    },
+    "MO": {
+        "name": "Altria Group, Inc.",
+        "market_cap": 90833346560,
+        "sector": "Consumer Defensive",
+        "industry": "Tobacco",
+        "viewed": false
+    },
+    "BKNG": {
+        "name": "Booking Holdings Inc.",
+        "market_cap": 158361075712,
+        "sector": "Consumer Cyclical",
+        "industry": "Travel Services",
+        "viewed": false
+    },
+    "ADP": {
+        "name": "Automatic Data Processing, Inc.",
+        "market_cap": 118033031168,
+        "sector": "Technology",
+        "industry": "Software - Application",
+        "viewed": false
+    },
+    "SYK": {
+        "name": "Stryker Corporation",
+        "market_cap": 139387830272,
+        "sector": "Healthcare",
+        "industry": "Medical Devices",
+        "viewed": false
+    },
+    "ANTM": {
+        "name": "ANTM",
+        "market_cap": "N/A",
+        "sector": "N/A",
+        "industry": "N/A",
+        "viewed": false
+    },
+    "ISRG": {
+        "name": "Intuitive Surgical, Inc.",
+        "market_cap": 181127708672,
+        "sector": "Healthcare",
+        "industry": "Medical Instruments & Supplies",
+        "viewed": false
+    },
+    "GILD": {
+        "name": "Gilead Sciences, Inc.",
+        "market_cap": 111775195136,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - General",
+        "viewed": false
+    },
+    "CSX": {
+        "name": "CSX Corporation",
+        "market_cap": 64821772288,
+        "sector": "Industrials",
+        "industry": "Railroads",
+        "viewed": false
+    },
+    "VRTX": {
+        "name": "Vertex Pharmaceuticals Incorporated",
+        "market_cap": 121313099776,
+        "sector": "Healthcare",
+        "industry": "Biotechnology",
+        "viewed": false
+    },
+    "ATVI": {
+        "name": "ATVI",
+        "market_cap": "N/A",
+        "sector": "N/A",
+        "industry": "N/A",
+        "viewed": false
+    },
+    "FIS": {
+        "name": "Fidelity National Information Services, Inc.",
+        "market_cap": 48653578240,
+        "sector": "Technology",
+        "industry": "Information Technology Services",
+        "viewed": false
+    },
+    "FISV": {
+        "name": "FISV",
+        "market_cap": "N/A",
+        "sector": "N/A",
+        "industry": "N/A",
+        "viewed": false
+    },
+    "ZTS": {
+        "name": "Zoetis Inc.",
+        "market_cap": 79333761024,
+        "sector": "Healthcare",
+        "industry": "Drug Manufacturers - Specialty & Generic",
+        "viewed": false
+    },
+    "MET": {
+        "name": "MetLife, Inc.",
+        "market_cap": 54614999040,
+        "sector": "Financial Services",
+        "industry": "Insurance - Life",
+        "viewed": false
+    },
+    "DHR": {
+        "name": "Danaher Corporation",
+        "market_cap": 178098569216,
+        "sector": "Healthcare",
+        "industry": "Diagnostics & Research",
+        "viewed": false
+    },
+    "SPGI": {
+        "name": "S&P Global Inc.",
+        "market_cap": 150715809792,
+        "sector": "Financial Services",
+        "industry": "Financial Data & Stock Exchanges",
+        "viewed": false
+    },
+    "TROW": {
+        "name": "T. Rowe Price Group, Inc.",
+        "market_cap": 25139513344,
+        "sector": "Financial Services",
+        "industry": "Asset Management",
+        "viewed": false
+    },
+    "MCO": {
+        "name": "Moody's Corporation",
+        "market_cap": 82949431296,
+        "sector": "Financial Services",
+        "industry": "Financial Data & Stock Exchanges",
+        "viewed": false
+    },
+    "MSCI": {
+        "name": "MSCI Inc.",
+        "market_cap": 46136397824,
+        "sector": "Financial Services",
+        "industry": "Financial Data & Stock Exchanges",
+        "viewed": false
+    },
+    "CB": {
+        "name": "Chubb Limited",
+        "market_cap": 111603720192,
+        "sector": "Financial Services",
+        "industry": "Insurance - Property & Casualty",
+        "viewed": false
+    },
+    "ICE": {
+        "name": "Intercontinental Exchange, Inc.",
+        "market_cap": 88769486848,
+        "sector": "Financial Services",
+        "industry": "Financial Data & Stock Exchanges",
+        "viewed": false
+    },
+    "PNC": {
+        "name": "The PNC Financial Services Group, Inc.",
+        "market_cap": 73793699840,
+        "sector": "Financial Services",
+        "industry": "Banks - Regional",
+        "viewed": false
+    },
+    "USB": {
+        "name": "U.S. Bancorp",
+        "market_cap": 73710690304,
+        "sector": "Financial Services",
+        "industry": "Banks - Regional",
+        "viewed": false
+    },
+    "NEM": {
+        "name": "Newmont Corporation",
+        "market_cap": 51805171712,
+        "sector": "Basic Materials",
+        "industry": "Gold",
+        "viewed": false
+    },
+    "COP": {
+        "name": "ConocoPhillips",
+        "market_cap": 125690871808,
+        "sector": "Energy",
+        "industry": "Oil & Gas E&P",
+        "viewed": false
+    },
+    "CARR": {
+        "name": "Carrier Global Corporation",
+        "market_cap": 65147654144,
+        "sector": "Industrials",
+        "industry": "Building Products & Equipment",
+        "viewed": false
+    },
+    "KMB": {
+        "name": "Kimberly-Clark Corporation",
+        "market_cap": 44660310016,
+        "sector": "Consumer Defensive",
+        "industry": "Household & Personal Products",
+        "viewed": false
+    },
+    "LNT": {
+        "name": "Alliant Energy Corporation",
+        "market_cap": 14674896896,
+        "sector": "Utilities",
+        "industry": "Utilities - Regulated Electric",
+        "viewed": false
+    },
+    "SYF": {
+        "name": "Synchrony Financial",
+        "market_cap": 21382772736,
+        "sector": "Financial Services",
+        "industry": "Credit Services",
+        "viewed": false
+    },
+    "RMD": {
+        "name": "ResMed Inc.",
+        "market_cap": 35777122304,
+        "sector": "Healthcare",
+        "industry": "Medical Instruments & Supplies",
+        "viewed": false
+    },
+    "EXC": {
+        "name": "Exelon Corporation",
+        "market_cap": 38017740800,
+        "sector": "Utilities",
+        "industry": "Utilities - Regulated Electric",
+        "viewed": false
+    },
+    "WBA": {
+        "name": "Walgreens Boots Alliance, Inc.",
+        "market_cap": 8131722752,
+        "sector": "Healthcare",
+        "industry": "Pharmaceutical Retailers",
+        "viewed": false
+    },
+    "MMC": {
+        "name": "Marsh & McLennan Companies, Inc.",
+        "market_cap": 108864643072,
+        "sector": "Financial Services",
+        "industry": "Insurance Brokers",
+        "viewed": false
+    },
+    "TAP": {
+        "name": "Molson Coors Beverage Company",
+        "market_cap": 11560152064,
+        "sector": "Consumer Defensive",
+        "industry": "Beverages - Brewers",
+        "viewed": false
+    },
+    "HIG": {
+        "name": "The Hartford Financial Services Group, Inc.",
+        "market_cap": 32180801536,
+        "sector": "Financial Services",
+        "industry": "Insurance - Property & Casualty",
+        "viewed": false
+    },
+    "PXD": {
+        "name": "PXD",
+        "market_cap": "N/A",
+        "sector": "N/A",
+        "industry": "N/A",
+        "viewed": false
+    },
+    "ADI": {
+        "name": "Analog Devices, Inc.",
+        "market_cap": 111564455936,
+        "sector": "Technology",
+        "industry": "Semiconductors",
+        "viewed": false
+    },
+    "PSA": {
+        "name": "Public Storage",
+        "market_cap": 57688784896,
+        "sector": "Real Estate",
+        "industry": "REIT - Industrial",
+        "viewed": false
+    },
+    "ETR": {
+        "name": "Entergy Corporation",
+        "market_cap": 30304425984,
+        "sector": "Utilities",
+        "industry": "Utilities - Regulated Electric",
+        "viewed": false
+    },
+    "MDLZ": {
+        "name": "Mondelez International, Inc.",
+        "market_cap": 91216412672,
+        "sector": "Consumer Defensive",
+        "industry": "Confectioners",
+        "viewed": false
+    },
+    "DTE": {
+        "name": "DTE Energy Company",
+        "market_cap": 25088215040,
+        "sector": "Utilities",
+        "industry": "Utilities - Regulated Electric",
+        "viewed": false
+    },
+    "WDC": {
+        "name": "Western Digital Corporation",
+        "market_cap": 22626586624,
+        "sector": "Technology",
+        "industry": "Computer Hardware",
+        "viewed": false
+    },
+    "LUMN": {
+        "name": "Lumen Technologies, Inc.",
+        "market_cap": 7529478144,
+        "sector": "Communication Services",
+        "industry": "Telecom Services",
+        "viewed": false
+    },
+    "NTRS": {
+        "name": "Northern Trust Corporation",
+        "market_cap": 19916945408,
+        "sector": "Financial Services",
+        "industry": "Asset Management",
+        "viewed": false
+    },
+    "HST": {
+        "name": "Host Hotels & Resorts, Inc.",
+        "market_cap": 24797104128,
+        "sector": "Real Estate",
+        "industry": "REIT - Hotel & Motel",
+        "viewed": false
+    },
+    "FANG": {
+        "name": "Diamondback Energy, Inc.",
+        "market_cap": 52790169600,
+        "sector": "Energy",
+        "industry": "Oil & Gas E&P",
+        "viewed": false
+    },
+    "TTWO": {
+        "name": "Take-Two Interactive Software, Inc.",
+        "market_cap": 28621961216,
+        "sector": "Communication Services",
+        "industry": "Electronic Gaming & Multimedia",
+        "viewed": false
+    },
+    "DLR": {
+        "name": "Digital Realty Trust, Inc.",
+        "market_cap": 59474558976,
+        "sector": "Real Estate",
+        "industry": "REIT - Specialty",
+        "viewed": false
     }
 }

@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from datetime import datetime, timedelta
+import mplfinance as mpf
 
 # Load stock cache from JSON file
 def load_stock_cache(filename='stock_cache.json'):
@@ -17,10 +18,14 @@ def fetch_stock_data(symbol, start_date, end_date):
     stock_data = yf.download(symbol, start=start_date, end=end_date)
     return stock_data
 
+# Ensure single column output after rolling calculations
+def ensure_single_series(series):
+    return series.squeeze() if isinstance(series, pd.DataFrame) else series
+
 # Generate various stock charts
 def line_chart(stock_data, symbol):
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['Close'], label='Close Price', color='blue')
     plt.title(f'{symbol} Line Chart')
     plt.xlabel('Date')
     plt.ylabel('Price')
@@ -30,10 +35,13 @@ def line_chart(stock_data, symbol):
     plt.close()
 
 def moving_average_chart(stock_data, symbol):
-    stock_data['MA50'] = stock_data['Close'].rolling(window=50).mean()
+    stock_data['MA50'] = ensure_single_series(stock_data['Close'].rolling(window=50).mean())
+    stock_data['MA200'] = ensure_single_series(stock_data['Close'].rolling(window=200).mean())
+    
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['Close'], label='Close Price', color='blue')
     plt.plot(stock_data['MA50'], label='50-Day MA', color='orange')
+    plt.plot(stock_data['MA200'], label='200-Day MA', color='green')
     plt.title(f'{symbol} Moving Average Chart')
     plt.xlabel('Date')
     plt.ylabel('Price')
@@ -43,11 +51,13 @@ def moving_average_chart(stock_data, symbol):
     plt.close()
 
 def bollinger_bands_chart(stock_data, symbol):
-    stock_data['MA20'] = stock_data['Close'].rolling(window=20).mean()
-    stock_data['Upper'] = stock_data['MA20'] + (stock_data['Close'].rolling(window=20).std() * 2)
-    stock_data['Lower'] = stock_data['MA20'] - (stock_data['Close'].rolling(window=20).std() * 2)
+    stock_data['MA20'] = ensure_single_series(stock_data['Close'].rolling(window=20).mean())
+    rolling_std = ensure_single_series(stock_data['Close'].rolling(window=20).std())
+    stock_data['Upper'] = stock_data['MA20'] + (rolling_std * 2)
+    stock_data['Lower'] = stock_data['MA20'] - (rolling_std * 2)
+    
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['Close'], label='Close Price', color='blue')
     plt.plot(stock_data['Upper'], label='Upper Band', linestyle='--', color='red')
     plt.plot(stock_data['Lower'], label='Lower Band', linestyle='--', color='red')
     plt.fill_between(stock_data.index, stock_data['Upper'], stock_data['Lower'], color='gray', alpha=0.1)
@@ -61,15 +71,15 @@ def bollinger_bands_chart(stock_data, symbol):
 
 def rsi_chart(stock_data, symbol):
     delta = stock_data['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
+    gain = ensure_single_series((delta.where(delta > 0, 0)).rolling(window=14).mean())
+    loss = ensure_single_series((-delta.where(delta < 0, 0)).rolling(window=14).mean())
+    rs = gain / loss.replace(0, np.nan)  # Avoid division by zero
     rsi = 100 - (100 / (1 + rs))
     
     plt.figure(figsize=(10, 5))
     plt.plot(rsi, label='RSI', color='purple')
-    plt.axhline(70, linestyle='--', color='red')
-    plt.axhline(30, linestyle='--', color='green')
+    plt.axhline(70, linestyle='--', color='red', label='Overbought (70)')
+    plt.axhline(30, linestyle='--', color='green', label='Oversold (30)')
     plt.title(f'{symbol} RSI Chart')
     plt.xlabel('Date')
     plt.ylabel('RSI')
@@ -79,7 +89,6 @@ def rsi_chart(stock_data, symbol):
     plt.close()
 
 def candlestick_chart(stock_data, symbol):
-    import mplfinance as mpf
     mpf.plot(stock_data, type='candle', volume=True, title=f'{symbol} Candlestick Chart', savefig=f'{symbol}_candlestick_chart.png')
 
 def volume_chart(stock_data, symbol):
@@ -93,10 +102,13 @@ def volume_chart(stock_data, symbol):
     plt.close()
 
 def ema_chart(stock_data, symbol):
-    stock_data['EMA'] = stock_data['Close'].ewm(span=20, adjust=False).mean()
+    stock_data['EMA20'] = ensure_single_series(stock_data['Close'].ewm(span=20, adjust=False).mean())
+    stock_data['EMA50'] = ensure_single_series(stock_data['Close'].ewm(span=50, adjust=False).mean())
+    
     plt.figure(figsize=(10, 5))
-    plt.plot(stock_data['Close'], label='Close Price')
-    plt.plot(stock_data['EMA'], label='20-Day EMA', color='orange')
+    plt.plot(stock_data['Close'], label='Close Price', color='blue')
+    plt.plot(stock_data['EMA20'], label='20-Day EMA', color='orange')
+    plt.plot(stock_data['EMA50'], label='50-Day EMA', color='green')
     plt.title(f'{symbol} EMA Chart')
     plt.xlabel('Date')
     plt.ylabel('Price')
@@ -106,16 +118,16 @@ def ema_chart(stock_data, symbol):
     plt.close()
 
 def stochastic_oscillator_chart(stock_data, symbol):
-    stock_data['L14'] = stock_data['Low'].rolling(window=14).min()
-    stock_data['H14'] = stock_data['High'].rolling(window=14).max()
-    stock_data['%K'] = 100 * (stock_data['Close'] - stock_data['L14']) / (stock_data['H14'] - stock_data['L14'])
-    stock_data['%D'] = stock_data['%K'].rolling(window=3).mean()
+    stock_data['L14'] = ensure_single_series(stock_data['Low'].rolling(window=14).min())
+    stock_data['H14'] = ensure_single_series(stock_data['High'].rolling(window=14).max())
+    stock_data['%K'] = 100 * (stock_data['Close'] - stock_data['L14']) / (stock_data['H14'] - stock_data['L14']).replace(0, np.nan)
+    stock_data['%D'] = ensure_single_series(stock_data['%K'].rolling(window=3).mean())
     
     plt.figure(figsize=(10, 5))
     plt.plot(stock_data['%K'], label='%K', color='blue')
     plt.plot(stock_data['%D'], label='%D', color='orange')
-    plt.axhline(80, linestyle='--', color='red')
-    plt.axhline(20, linestyle='--', color='green')
+    plt.axhline(80, linestyle='--', color='red', label='Overbought (80)')
+    plt.axhline(20, linestyle='--', color='green', label='Oversold (20)')
     plt.title(f'{symbol} Stochastic Oscillator Chart')
     plt.xlabel('Date')
     plt.ylabel('Value')
@@ -125,10 +137,10 @@ def stochastic_oscillator_chart(stock_data, symbol):
     plt.close()
 
 def macd_chart(stock_data, symbol):
-    stock_data['EMA12'] = stock_data['Close'].ewm(span=12, adjust=False).mean()
-    stock_data['EMA26'] = stock_data['Close'].ewm(span=26, adjust=False).mean()
+    stock_data['EMA12'] = ensure_single_series(stock_data['Close'].ewm(span=12, adjust=False).mean())
+    stock_data['EMA26'] = ensure_single_series(stock_data['Close'].ewm(span=26, adjust=False).mean())
     stock_data['MACD'] = stock_data['EMA12'] - stock_data['EMA26']
-    stock_data['Signal'] = stock_data['MACD'].ewm(span=9, adjust=False).mean()
+    stock_data['Signal'] = ensure_single_series(stock_data['MACD'].ewm(span=9, adjust=False).mean())
 
     plt.figure(figsize=(10, 5))
     plt.plot(stock_data['MACD'], label='MACD', color='blue')
@@ -160,7 +172,7 @@ def price_histogram(stock_data, symbol):
     plt.close()
 
 def percentage_change_chart(stock_data, symbol):
-    percentage_change = stock_data['Close'].pct_change() * 100
+    percentage_change = ensure_single_series(stock_data['Close'].pct_change() * 100)
     plt.figure(figsize=(10, 5))
     plt.plot(percentage_change, label='Percentage Change', color='blue')
     plt.title(f'{symbol} Percentage Change Chart')
@@ -186,9 +198,10 @@ def drawdown_chart(stock_data, symbol):
     plt.close()
 
 def vwap_chart(stock_data, symbol):
-    vwap = (stock_data['Volume'] * (stock_data['High'] + stock_data['Low'] + stock_data['Close']) / 3).cumsum() / stock_data['Volume'].cumsum()
+    stock_data['VWAP'] = (stock_data['Volume'] * (stock_data['High'] + stock_data['Low'] + stock_data['Close']) / 3).cumsum() / stock_data['Volume'].cumsum()
+    
     plt.figure(figsize=(10, 5))
-    plt.plot(vwap, label='VWAP', color='purple')
+    plt.plot(stock_data['VWAP'], label='VWAP', color='blue')
     plt.title(f'{symbol} VWAP Chart')
     plt.xlabel('Date')
     plt.ylabel('VWAP')

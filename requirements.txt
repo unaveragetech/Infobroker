@@ -5,3 +5,4 @@ beautifulsoup4
 aiohttp
 aiofiles
 matplotlib
+mplfinance
