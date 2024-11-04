@@ -52,7 +52,7 @@ def save_cache(data):
     --def fetch_stock_symbols_from_exchange(Replace this below with an option above or from the exchange.txt file exchange=your replacement here):
     """
 #----------------------------------------------------------
-def fetch_stock_symbols_from_exchange(exchange="^IXIC"):
+def fetch_stock_symbols_from_exchange(exchange="^GSPC"):
     try:
         # Fetching symbols based on the specified exchange
         exchange_ticker = yf.Ticker(exchange)
@@ -84,7 +84,7 @@ def get_default_symbols():
         "MDLZ", "DTE", "WDC", "LUMN", "NTRS", "HST", "FANG", "TTWO", "DLR", "O",
         "REXR", "ZBRA", "MPC", "MLM", "VTRS", "SRE", "CBRE", "KEYS", "DOV", "FMC"
     ]
-
+#--------------------------Cache_update-------------------------------------------------------------
 def update_cache_with_symbols(symbols):
     cache = load_cache()
     for symbol in symbols:
