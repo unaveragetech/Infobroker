@@ -1,8 +1,17 @@
-yfinance
-pandas
+# Required market stack: yfinance → pandas → TA-Lib
+yfinance>=0.2.40
+pandas>=2.0
+numpy
+TA-Lib>=0.4.28
 requests
-beautifulsoup4
-aiohttp
-aiofiles
+python-dotenv
 matplotlib
 mplfinance
+seaborn
+aiohttp
+aiofiles
+beautifulsoup4
+fastapi
+uvicorn[standard]
+pydantic
+mcp

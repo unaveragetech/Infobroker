@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Infobroker — Technical Desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=31" />
+</head>
+<body>
+  <header class="topbar" data-tour="topbar">
+    <div class="brand" data-tour="brand">
+      <div class="brand-lockup">
+        <h1>Infobroker</h1>
+        <span class="tag">Technical Desk</span>
+      </div>
+      <div class="brand-clocks" id="brand-clocks" aria-label="World market clocks">
+        <div class="brand-local-clock">
+          <span class="muted">Local</span>
+          <strong class="mono" id="brand-local-time">—</strong>
+          <span class="chip" id="brand-us-status">US …</span>
+          <span class="mono muted" id="brand-us-opens" hidden></span>
+        </div>
+        <div class="world-clocks" id="world-clocks"></div>
+      </div>
+    </div>
+    <div class="top-meta">
+      <span class="chip-group" data-tour="status-chips">
+        <span class="chip" id="chip-broker">broker: …</span>
+        <span class="chip" id="chip-data">data: …</span>
+        <span class="chip" id="chip-mode">mode: …</span>
+        <span class="chip" id="chip-ollama">ollama: …</span>
+      </span>
+      <label class="chip" style="cursor:pointer;display:flex;align-items:center;gap:0.35rem">
+        <input type="checkbox" id="auto-refresh" checked />
+        auto 60s
+      </label>
+      <span class="chip-group" data-tour="top-actions">
+        <button class="btn" id="btn-refresh" type="button">Refresh</button>
+        <button class="btn" id="btn-scan" type="button">Scan</button>
+        <button class="btn" id="btn-hunt" type="button">Hunt</button>
+      </span>
+      <button class="btn" id="btn-tour" type="button" title="Guided tour of the desk">Tour</button>
+      <button class="btn" id="btn-settings" type="button" title="Settings, project docs, and technical reference" data-tour="settings-btn">Settings</button>
+      <button class="btn primary" id="btn-keys" type="button" data-tour="api-keys-btn">API Keys</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT -->
+    <aside class="stack" data-tour="rail-left">
+      <section class="panel" data-tour="account">
+        <header>
+          <h2>Account</h2>
+          <span class="mono muted" id="acct-broker">—</span>
+        </header>
+        <div class="body">
+          <div class="form-grid">
+            <div>
+              <div class="muted">Cash</div>
+              <div class="mono" id="acct-cash">—</div>
+            </div>
+            <div>
+              <div class="muted">Equity</div>
+              <div class="mono" id="acct-equity">—</div>
+            </div>
+            <div>
+              <div class="muted">Buying power</div>
+              <div class="mono" id="acct-bp">—</div>
+            </div>
+            <div>
+              <div class="muted">Positions</div>
+              <div class="mono" id="acct-pos-count">0</div>
+            </div>
+          </div>
+          <div id="positions-box" class="list-compact" style="margin-top:0.75rem"></div>
+          <button class="btn" id="btn-process-stops" type="button" style="width:100%;margin-top:0.65rem" hidden>
+            Process paper stops
+          </button>
+        </div>
+      </section>
+
+      <section class="panel" data-tour="watchlist">
+        <header>
+          <h2>Watchlist</h2>
+        </header>
+        <div class="body">
+          <div class="inline" style="margin-bottom:0.65rem">
+            <input id="watch-input" placeholder="Add ticker e.g. AAPL" maxlength="12" autocomplete="off" />
+            <button class="btn primary" id="btn-watch-add" type="button">Add</button>
+          </div>
+          <div id="watch-error" class="banner error" hidden></div>
+          <div id="watch-list" class="list-compact"></div>
+        </div>
+      </section>
+
+      <section class="panel learn-panel" data-tour="learn-rail">
+        <header>
+          <h2>Learn</h2>
+          <span class="muted mono" style="font-size:0.68rem">guided</span>
+        </header>
+        <div class="body">
+          <p class="muted" style="margin:0 0 0.65rem;font-size:0.78rem;line-height:1.4">
+            Tutor path, trade journal, and skill lessons live in the Learning tab — one topic per page.
+          </p>
+          <button class="btn" id="btn-tour-sidebar" type="button" style="width:100%;margin-bottom:0.4rem">Take the desk tour</button>
+          <button class="btn primary" id="btn-goto-learning" type="button" style="width:100%">Open Learning</button>
+          <button class="btn" id="btn-goto-tutor" type="button" style="width:100%;margin-top:0.4rem">Start tutor path</button>
+          <div id="lessons-box" class="lesson-rail" style="margin-top:0.75rem"></div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- CENTER -->
+    <section class="stack">
+      <nav class="desk-tabs" aria-label="Desk sections" data-tour="desk-tabs">
+        <button type="button" class="desk-tab active" data-desk-tab="markets" title="Live board, universe, movers, scanner, and symbol detail">Markets</button>
+        <button type="button" class="desk-tab" data-desk-tab="trading" title="Quick buy/sell desk with bid/ask for watchlist and live universe">Trading</button>
+        <button type="button" class="desk-tab" data-desk-tab="portfolio" title="Positions, orders, P&amp;L, and auto-track gainers">Portfolio</button>
+        <button type="button" class="desk-tab" data-desk-tab="learning" title="Tutor path, trade journal, and skill lessons">Learning</button>
+        <button type="button" class="desk-tab" data-desk-tab="strategies" title="Base strategies and free yfinance backtests">Strategies</button>
+        <button type="button" class="desk-tab" data-desk-tab="charts" title="Inspectable chart studio with drawing tools">Chart studio</button>
+        <button type="button" class="desk-tab" data-desk-tab="services" title="Ollama, MCP, and API key management">Services &amp; keys</button>
+        <button type="button" class="desk-tab" data-desk-tab="settings" title="Project docs, data pipeline, and technical reference">Settings</button>
+      </nav>
+
+      <div id="tab-markets" class="desk-tab-panel">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Markets</h2>
+            <p class="page-lead">Live action board first — then universe, board, movers, scanner, and symbol tools.</p>
+          </div>
+        </header>
+        <nav class="sub-tabs" aria-label="Markets sections" data-subtab-group="markets" data-tour="markets-subtabs">
+          <button type="button" class="sub-tab active" data-sub-tab="live">Live</button>
+          <button type="button" class="sub-tab" data-sub-tab="universe">Universe</button>
+          <button type="button" class="sub-tab" data-sub-tab="board">Board</button>
+          <button type="button" class="sub-tab" data-sub-tab="movers">Movers</button>
+          <button type="button" class="sub-tab" data-sub-tab="scanner">Scanner</button>
+          <button type="button" class="sub-tab" data-sub-tab="symbol">Symbol</button>
+        </nav>
+
+        <div class="sub-panel" data-sub-panel="markets-live" data-tour="markets-live">
+          <section class="live-stage panel">
+            <header class="live-stage-head">
+              <div class="live-brand">
+                <span class="live-pulse" aria-hidden="true"></span>
+                <h2>Live</h2>
+                <span class="muted mono" id="live-asof">—</span>
+                <span class="chip" id="live-mkt-chip" hidden>US</span>
+              </div>
+              <div class="live-stage-actions">
+                <label class="live-auto-label muted">
+                  <input type="checkbox" id="live-auto" checked />
+                  Auto
+                </label>
+                <button type="button" class="btn ghost" id="btn-live-refresh">Refresh</button>
+                <button type="button" class="btn ghost" id="btn-live-fill" title="Pull a larger quote batch for unmapped tickers">Fill quotes</button>
+              </div>
+            </header>
+
+            <div class="live-metrics" id="live-metrics">
+              <div class="live-metric"><span class="muted">On board</span><strong class="mono" id="live-stats">—</strong></div>
+              <div class="live-metric"><span class="muted">Advancers</span><strong class="mono up" id="live-up">—</strong></div>
+              <div class="live-metric"><span class="muted">Decliners</span><strong class="mono down" id="live-down">—</strong></div>
+              <div class="live-metric live-metric-wide">
+                <span class="muted">Quote coverage</span>
+                <div class="live-coverage">
+                  <div class="live-coverage-track"><div class="live-coverage-fill" id="live-coverage-fill"></div></div>
+                  <span class="mono" id="live-coverage-label">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="live-dash-bar">
+              <select id="live-mode" aria-label="Board mode" class="live-select">
+                <option value="universe">Full universe</option>
+                <option value="heat">Top movers</option>
+                <option value="gainers">Gainers</option>
+                <option value="losers">Losers</option>
+                <option value="volume">Volume leaders</option>
+              </select>
+              <select id="live-sort" aria-label="Sort" class="live-select">
+                <option value="abs_change">Sort · |Day %|</option>
+                <option value="change_desc">Sort · Day % ↓</option>
+                <option value="change_asc">Sort · Day % ↑</option>
+                <option value="volume">Sort · Volume</option>
+                <option value="rel_volume">Sort · Rel volume</option>
+                <option value="week">Sort · Week %</option>
+                <option value="price">Sort · Price</option>
+                <option value="symbol">Sort · Symbol</option>
+              </select>
+              <select id="live-view" aria-label="View style" class="live-select">
+                <option value="tiles">View · Tiles</option>
+                <option value="blocks">View · Blocks</option>
+                <option value="bubbles">View · Volume map</option>
+                <option value="table">View · Table</option>
+                <option value="markets">View · By venue</option>
+              </select>
+              <select id="live-class" aria-label="Asset class" class="live-select">
+                <option value="">All assets</option>
+                <option value="stock">Stocks / ADR</option>
+                <option value="etf">ETFs</option>
+              </select>
+              <input type="hidden" id="live-exchange" value="" />
+            </div>
+
+            <div class="live-market-switch" id="live-market-switch" aria-label="Market switcher">
+              <span class="muted live-mkt-label">Market</span>
+              <div class="live-mkt-pills" id="live-mkt-pills">
+                <button type="button" class="live-mkt-pill active" data-mkt-focus="us">US All</button>
+                <button type="button" class="live-mkt-pill" data-mkt-focus="nasdaq">NASDAQ</button>
+                <button type="button" class="live-mkt-pill" data-mkt-focus="nyse">NYSE</button>
+                <button type="button" class="live-mkt-pill" data-mkt-focus="arca">Arca</button>
+                <button type="button" class="live-mkt-pill" data-mkt-focus="amex">AMEX</button>
+                <span class="live-mkt-sep" aria-hidden="true"></span>
+                <button type="button" class="live-mkt-pill foreign" data-mkt-focus="london">London</button>
+                <button type="button" class="live-mkt-pill foreign" data-mkt-focus="frankfurt">Frankfurt</button>
+                <button type="button" class="live-mkt-pill foreign" data-mkt-focus="tokyo">Tokyo</button>
+                <button type="button" class="live-mkt-pill foreign" data-mkt-focus="hongkong">Hong Kong</button>
+                <button type="button" class="live-mkt-pill foreign" data-mkt-focus="sydney">Sydney</button>
+              </div>
+            </div>
+            <div id="live-market-note" class="muted live-market-note" hidden></div>
+
+            <div id="live-error" class="banner error" hidden></div>
+
+            <details class="live-collapse" id="live-collapse-board" open>
+              <summary>Market board <span class="muted mono" id="live-board-count"></span></summary>
+              <div id="live-heat" class="live-heat view-tiles" aria-live="polite"></div>
+            </details>
+
+            <details class="live-collapse" id="live-collapse-chart">
+              <summary>Chart desk <span class="muted mono" id="live-chart-summary">pick a ticker</span></summary>
+              <div class="live-chart-dock" id="live-chart-dock">
+                <div class="live-chart-empty" id="live-chart-empty">
+                  <p>Select a ticker on the board to inspect price action</p>
+                </div>
+                <div class="live-chart-body" id="live-chart-body" hidden>
+                  <div class="live-chart-meta">
+                    <div>
+                      <span class="mono live-chart-sym" id="live-chart-sym">—</span>
+                      <span class="muted" id="live-chart-name"></span>
+                      <span class="chip" id="live-stream-chip" hidden>stream</span>
+                    </div>
+                    <div class="live-chart-quote">
+                      <span class="mono" id="live-chart-px">—</span>
+                      <span class="mono" id="live-chart-chg">—</span>
+                    </div>
+                  </div>
+                  <div class="live-chart-toolbar">
+                    <select id="live-chart-tf" class="live-select" aria-label="Chart timeframe">
+                      <option value="live1m">Live · 1m</option>
+                      <option value="live5m">Live · 5m</option>
+                      <option value="daily90">Daily · 90d</option>
+                    </select>
+                    <label class="live-auto-label muted">
+                      <input type="checkbox" id="live-stream" checked />
+                      Stream ticks
+                    </label>
+                    <span class="muted mono" id="live-stream-status">—</span>
+                  </div>
+                  <div id="live-session-banner" class="banner ok" hidden></div>
+                  <div class="chart-draw-tools" id="live-draw-tools">
+                    <button type="button" class="btn ghost active" data-live-tool="inspect">Inspect</button>
+                    <button type="button" class="btn ghost" data-live-tool="trend">Trend</button>
+                    <button type="button" class="btn ghost" data-live-tool="hline">H-Line</button>
+                    <button type="button" class="btn ghost" id="btn-live-undo-draw">Undo</button>
+                    <button type="button" class="btn ghost" id="btn-live-clear-draw">Clear</button>
+                  </div>
+                  <div class="chart-host live-chart-host">
+                    <canvas id="live-chart-canvas" width="1200" height="420"></canvas>
+                    <div class="chart-inspect" id="live-chart-inspect" hidden></div>
+                  </div>
+                  <p class="muted live-chart-hint">Live stream updates ~1s when US cash is open (shared server cache). Closed markets slow to ~12s.</p>
+                </div>
+              </div>
+            </details>
+
+            <details class="live-collapse" id="live-collapse-tape" open>
+              <summary>Running tape</summary>
+              <div class="live-tape-wrap">
+                <div class="live-tape" id="live-tape"></div>
+              </div>
+            </details>
+
+            <details class="live-collapse" id="live-collapse-news">
+              <summary>Finnhub headlines</summary>
+              <div id="live-news" class="live-news"></div>
+            </details>
+
+            <div id="live-providers" hidden></div>
+            <div id="live-market-status" hidden></div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="markets-universe" data-tour="markets-universe" hidden>
+          <p class="sub-hint">Exchange listings (NASDAQ Trader) plus Yahoo → Finnhub quote cascade — not limited to your watchlist.</p>
+          <section class="panel">
+            <header>
+              <h2>Market universe</h2>
+              <span class="muted mono" id="universe-asof">—</span>
+            </header>
+            <div class="body">
+              <div id="universe-stats" class="universe-stats muted">Loading listings…</div>
+              <div class="inline universe-toolbar">
+                <input id="universe-q" type="search" placeholder="Search symbol or name" autocomplete="off" />
+                <select id="universe-exchange" aria-label="Exchange filter">
+                  <option value="">All exchanges</option>
+                  <option value="NASDAQ">NASDAQ</option>
+                  <option value="NYSE">NYSE</option>
+                  <option value="NYSE Arca">NYSE Arca</option>
+                  <option value="NYSE American">NYSE American</option>
+                  <option value="BATS">BATS</option>
+                  <option value="IEX">IEX</option>
+                </select>
+                <select id="universe-class" aria-label="Asset class">
+                  <option value="">All classes</option>
+                  <option value="stock">Stock</option>
+                  <option value="etf">ETF</option>
+                  <option value="adr">ADR</option>
+                  <option value="preferred">Preferred</option>
+                  <option value="other">Other</option>
+                </select>
+                <label class="inline muted" style="gap:0.35rem">
+                  <input type="checkbox" id="universe-quoted-only" />
+                  Quoted only
+                </label>
+                <button type="button" class="btn ghost" id="btn-universe-search">Search</button>
+                <button type="button" class="btn ghost" id="btn-universe-listings">Sync listings</button>
+                <button type="button" class="btn ghost" id="btn-universe-quotes">Refresh quotes</button>
+              </div>
+              <div id="universe-error" class="banner error" hidden></div>
+              <div style="overflow-x:auto">
+                <table class="grid ticker-table" id="universe-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th>Exch</th>
+                      <th>Last</th>
+                      <th>Day %</th>
+                      <th>Vol</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="universe-body">
+                    <tr><td colspan="7"><div class="skeleton"></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="inline" style="margin-top:0.65rem; justify-content:space-between">
+                <span class="muted mono" id="universe-page">—</span>
+                <div class="inline">
+                  <button type="button" class="btn ghost" id="btn-universe-prev">Prev</button>
+                  <button type="button" class="btn ghost" id="btn-universe-next">Next</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="markets-board" data-tour="markets-board" hidden>
+          <p class="sub-hint">Indices and your personal tracked list. The full market lives under Universe.</p>
+          <div class="indices" id="indices"></div>
+          <section class="panel">
+            <header>
+              <h2>Tracked tickers</h2>
+              <span class="muted mono" id="tracked-asof">—</span>
+            </header>
+            <div class="body" style="padding-top:0">
+              <div id="tracked-error" class="banner error" hidden></div>
+              <div style="overflow-x:auto">
+                <table class="grid ticker-table" id="tracked-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Last</th>
+                      <th>Chg</th>
+                      <th>Day %</th>
+                      <th>Week %</th>
+                      <th>RVol</th>
+                      <th>Range</th>
+                      <th>Spark</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tracked-body">
+                    <tr><td colspan="8"><div class="skeleton"></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="markets-movers" data-tour="markets-movers" hidden>
+          <p class="sub-hint">Movers from the live universe quote cache, plus notables from your tracked list.</p>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:1rem">
+            <section class="panel">
+              <header><h2>Notable in tracked</h2></header>
+              <div class="body">
+                <div id="notable-tracked" class="list-compact"><div class="skeleton"></div></div>
+              </div>
+            </section>
+            <section class="panel">
+              <header><h2>Volume leaders</h2></header>
+              <div class="body">
+                <div id="volume-leaders" class="list-compact"><div class="skeleton"></div></div>
+              </div>
+            </section>
+          </div>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:1rem">
+            <section class="panel">
+              <header>
+                <h2>Stocks of the day</h2>
+                <div class="tabs">
+                  <button type="button" class="btn ghost active" data-day-tab="gainers">Gainers</button>
+                  <button type="button" class="btn ghost" data-day-tab="losers">Losers</button>
+                </div>
+              </header>
+              <div class="body">
+                <div id="stocks-day" class="list-compact"><div class="skeleton"></div></div>
+              </div>
+            </section>
+            <section class="panel">
+              <header>
+                <h2>Stocks of the week</h2>
+                <div class="tabs">
+                  <button type="button" class="btn ghost active" data-week-tab="gainers">Gainers</button>
+                  <button type="button" class="btn ghost" data-week-tab="losers">Losers</button>
+                </div>
+              </header>
+              <div class="body">
+                <div id="stocks-week" class="list-compact"><div class="skeleton"></div></div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="markets-scanner" data-tour="markets-scanner" hidden>
+          <p class="sub-hint">Scan liquid names across the market universe (default), or limit to your watchlist.</p>
+          <section class="panel">
+            <header>
+              <h2>Signal scanner</h2>
+              <span class="muted mono" id="scan-asof">—</span>
+            </header>
+            <div class="body">
+              <div class="inline" style="margin-bottom:0.65rem; gap:0.75rem">
+                <label class="inline muted" style="gap:0.35rem">
+                  <input type="radio" name="scan-scope" value="universe" checked />
+                  Universe (liquid)
+                </label>
+                <label class="inline muted" style="gap:0.35rem">
+                  <input type="radio" name="scan-scope" value="watchlist" />
+                  Watchlist only
+                </label>
+                <button type="button" class="btn ghost" id="btn-scan-here">Run scan</button>
+              </div>
+              <div id="scan-box" class="list-compact"><div class="empty">Click Scan to analyze liquid universe names (or switch to watchlist).</div></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="markets-symbol" data-tour="markets-symbol" hidden>
+          <p class="sub-hint">One ticker at a time — quote, chart, tip, then Trade this.</p>
+          <section class="panel">
+            <header>
+              <h2>Symbol detail</h2>
+              <span class="mono" id="detail-sym">—</span>
+            </header>
+            <div class="body">
+              <div id="detail-empty" class="empty">Select a ticker from Board, Movers, or the watchlist.</div>
+              <div id="detail-body" hidden>
+                <div class="form-grid">
+                  <div><div class="muted">Price</div><div class="mono" id="detail-price">—</div></div>
+                  <div><div class="muted">High / Low</div><div class="mono" id="detail-hl">—</div></div>
+                  <div><div class="muted">Volume</div><div class="mono" id="detail-vol">—</div></div>
+                  <div><div class="muted">Provider</div><div class="mono" id="detail-provider">—</div></div>
+                </div>
+                <div class="inline" style="margin:0.55rem 0; flex-wrap:wrap">
+                  <button class="btn ghost active" type="button" id="chart-mode-line">Line</button>
+                  <button class="btn ghost" type="button" id="chart-mode-candle">Candles</button>
+                  <span class="chart-tools-sep" aria-hidden="true"></span>
+                  <button class="btn ghost active" type="button" data-detail-tool="inspect">Inspect</button>
+                  <button class="btn ghost" type="button" data-detail-tool="trend">Trend</button>
+                  <button class="btn ghost" type="button" data-detail-tool="hline">H-Line</button>
+                  <button class="btn ghost" type="button" id="btn-detail-undo-draw">Undo</button>
+                  <button class="btn ghost" type="button" id="btn-detail-clear-draw">Clear lines</button>
+                  <button class="btn ghost" type="button" id="btn-detail-reset-zoom">Reset zoom</button>
+                  <button class="btn" type="button" id="btn-trade-selected">Trade this</button>
+                  <button class="btn ghost" type="button" id="btn-symbol-to-charts">Chart studio</button>
+                </div>
+                <div class="chart-host" id="detail-chart-host">
+                  <canvas class="detail-chart tall" id="detail-spark" width="720" height="220"></canvas>
+                  <div class="chart-inspect" id="detail-inspect" hidden></div>
+                </div>
+                <p class="muted" id="detail-tip" style="margin:0.5rem 0 0;font-size:0.8rem"></p>
+                <pre class="mono muted" id="detail-fund" style="white-space:pre-wrap;font-size:0.75rem;margin-top:0.75rem"></pre>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div><!-- /tab-markets -->
+
+      <div id="tab-trading" class="desk-tab-panel" hidden data-tour="trading">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Trading</h2>
+            <p class="page-lead">Bid / ask / last for your watchlist and the live universe — one-click market buy &amp; sell, with portfolio changes logged below.</p>
+          </div>
+          <div class="inline" style="gap:0.45rem;flex-wrap:wrap">
+            <select id="tr-scope" class="live-select" aria-label="Trading scope" title="Choose watchlist, live universe movers, or both">
+              <option value="both">Watchlist + Live</option>
+              <option value="watchlist">Watchlist only</option>
+              <option value="live">Live universe</option>
+            </select>
+            <button type="button" class="btn ghost" id="btn-trading-refresh" title="Refresh quotes, positions, and the activity log">Refresh</button>
+          </div>
+        </header>
+
+        <div class="form-grid portfolio-summary-grid" id="trading-summary">
+          <div class="portfolio-stat"><div class="muted">Equity</div><div class="mono" id="tr-equity">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Cash</div><div class="mono" id="tr-cash">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Buying power</div><div class="mono" id="tr-bp">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Positions</div><div class="mono" id="tr-pos-count">—</div></div>
+          <div class="portfolio-stat"><div class="muted">On board</div><div class="mono" id="tr-board-count">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Broker</div><div class="mono" id="tr-broker">—</div></div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns:1.6fr 0.9fr; gap:1rem; margin-top:1rem">
+          <section class="panel">
+            <header>
+              <h2>Trade board</h2>
+              <span class="muted mono" id="tr-asof">—</span>
+            </header>
+            <div class="body" style="padding-top:0; overflow-x:auto; max-height:min(70vh,720px)">
+              <div id="tr-error" class="banner error" hidden></div>
+              <table class="grid ticker-table" id="tr-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Bid</th>
+                    <th>Ask</th>
+                    <th>Last</th>
+                    <th>Day %</th>
+                    <th>Pos</th>
+                    <th>Qty</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tr-body">
+                  <tr><td colspan="8"><div class="empty">Loading trade board…</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <header>
+              <h2>Portfolio activity</h2>
+              <button type="button" class="btn ghost btn-xs" id="btn-tr-clear-log" title="Clear the on-screen activity log">Clear</button>
+            </header>
+            <div class="body">
+              <p class="muted" style="margin:0 0 0.5rem;font-size:0.75rem">Adds, removals, and size changes after each trade on this desk.</p>
+              <div id="tr-activity" class="list-compact"><div class="empty">No portfolio changes yet</div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="tab-portfolio" class="desk-tab-panel" hidden data-tour="portfolio">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Portfolio</h2>
+            <p class="page-lead">Positions, open orders, P&amp;L, and recent trades — plus auto-track for big gainers.</p>
+          </div>
+          <button type="button" class="btn ghost" id="btn-portfolio-refresh">Refresh</button>
+        </header>
+
+        <div class="form-grid portfolio-summary-grid" id="portfolio-summary">
+          <div class="portfolio-stat"><div class="muted">Equity</div><div class="mono" id="pf-equity">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Cash</div><div class="mono" id="pf-cash">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Buying power</div><div class="mono" id="pf-bp">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Unrealized P&amp;L</div><div class="mono" id="pf-upl">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Positions value</div><div class="mono" id="pf-mv">—</div></div>
+          <div class="portfolio-stat"><div class="muted">Broker</div><div class="mono" id="pf-broker">—</div></div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns:1.2fr 1fr; gap:1rem; margin-top:1rem">
+          <section class="panel">
+            <header>
+              <h2>Open positions</h2>
+              <span class="muted mono" id="pf-pos-count">—</span>
+            </header>
+            <div class="body" style="padding-top:0; overflow-x:auto">
+              <table class="grid ticker-table" id="pf-positions-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Avg</th>
+                    <th>Value</th>
+                    <th>P&amp;L</th>
+                    <th>P&amp;L %</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="pf-positions-body">
+                  <tr><td colspan="7"><div class="empty">No open positions</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <header>
+              <h2>Orders</h2>
+              <span class="muted mono" id="pf-orders-count">—</span>
+            </header>
+            <div class="body">
+              <div id="pf-orders-box" class="list-compact"><div class="empty">No orders yet</div></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel" style="margin-top:1rem" data-tour="auto-track">
+          <header>
+            <h2>Auto-track gainers</h2>
+            <span class="muted mono" id="at-status">off</span>
+          </header>
+          <div class="body">
+            <p class="muted" style="margin:0 0 0.75rem;font-size:0.8rem">
+              When enabled, the desk scans the quoted universe and adds tickers up ≥ X% on the day to your watchlist (selected markets).
+            </p>
+            <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.75rem">
+              <label class="inline muted" style="gap:0.4rem; align-items:center">
+                <input type="checkbox" id="at-enabled" />
+                Enable auto-track
+              </label>
+              <div class="form-row">
+                <label for="at-threshold">Min day move %</label>
+                <input id="at-threshold" type="number" step="0.5" min="0.5" max="100" value="5" />
+              </div>
+              <div class="form-row">
+                <label for="at-poll">Poll (sec)</label>
+                <input id="at-poll" type="number" step="10" min="30" max="600" value="60" />
+              </div>
+              <div class="form-row">
+                <label for="at-max">Max adds / scan</label>
+                <input id="at-max" type="number" step="1" min="1" max="50" value="12" />
+              </div>
+            </div>
+            <div class="form-row" style="margin-top:0.65rem">
+              <label for="at-exchanges">Markets (comma-separated; blank = all)</label>
+              <input id="at-exchanges" placeholder="NASDAQ, NYSE, NYSE Arca" />
+            </div>
+            <div class="inline" style="margin-top:0.65rem; gap:0.75rem; flex-wrap:wrap">
+              <label class="inline muted" style="gap:0.35rem">
+                <input type="checkbox" id="at-stocks" checked /> Stocks / ADR
+              </label>
+              <label class="inline muted" style="gap:0.35rem">
+                <input type="checkbox" id="at-etf" /> Include ETFs
+              </label>
+              <button type="button" class="btn primary" id="btn-at-save">Save rules</button>
+              <button type="button" class="btn ghost" id="btn-at-scan">Scan now</button>
+            </div>
+            <div id="at-banner" class="banner ok" hidden style="margin-top:0.65rem"></div>
+            <div id="at-last" class="muted" style="margin-top:0.65rem;font-size:0.78rem">—</div>
+            <div id="at-added" class="list-compact" style="margin-top:0.5rem"></div>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-learning" class="desk-tab-panel" hidden>
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Learning</h2>
+            <p class="page-lead">Learn like a student: tutor path first, then review real trades, then drill skill lessons.</p>
+          </div>
+        </header>
+        <nav class="sub-tabs" aria-label="Learning sections" data-subtab-group="learning" data-tour="learning-subtabs">
+          <button type="button" class="sub-tab active" data-sub-tab="tutor">Tutor</button>
+          <button type="button" class="sub-tab" data-sub-tab="journal">Trade journal</button>
+          <button type="button" class="sub-tab" data-sub-tab="lessons">Skill lessons</button>
+        </nav>
+
+        <div class="sub-panel" data-sub-panel="learning-tutor" data-tour="learning-tutor">
+          <p class="sub-hint">Teacher-style walkthrough of every basic way to trade on this desk.</p>
+          <section class="panel">
+            <header>
+              <h2>Ways to trade</h2>
+              <span class="muted mono">10 pages</span>
+            </header>
+            <div class="body">
+              <p class="muted" style="margin-top:0;font-size:0.85rem" id="tutor-blurb">
+                Market, limit, stop, brackets, swing vs day, risk, and your desk loop.
+              </p>
+              <div class="inline">
+                <button class="btn primary" id="btn-start-tutor" type="button">Start from page 1</button>
+                <button class="btn" id="btn-tutor-continue" type="button">Continue where I left off</button>
+              </div>
+              <div id="tutor-page-list" class="tutor-page-list" style="margin-top:0.75rem"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="learning-journal" data-tour="learning-journal" hidden>
+          <p class="sub-hint">Your blotter, annotated — idea, style, and tutor tip under each fill.</p>
+          <section class="panel">
+            <header>
+              <h2>Your trade history</h2>
+              <button class="btn ghost" id="btn-refresh-stories" type="button">Reload</button>
+            </header>
+            <div class="body">
+              <p class="muted" id="stories-summary" style="margin-top:0;font-size:0.8rem">—</p>
+              <div id="trade-stories" class="trade-stories"><div class="skeleton"></div></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="learning-lessons" data-tour="learning-lessons" hidden>
+          <p class="sub-hint">Multi-page skill lessons (candles, indicators, risk…). Tap a card to open the reader.</p>
+          <section class="panel">
+            <header>
+              <h2>Skill lessons</h2>
+              <span class="muted mono">multi-page</span>
+            </header>
+            <div class="body">
+              <div id="learning-lesson-grid" class="strategy-cards"><div class="skeleton"></div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="tab-strategies" class="desk-tab-panel" hidden data-tour="strategies">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Strategies</h2>
+            <p class="page-lead">Pick a base idea, run a free yfinance backtest, then read the equity curve before you size risk.</p>
+          </div>
+        </header>
+        <section class="panel">
+          <header>
+            <h2>Base strategies</h2>
+            <span class="muted mono">yfinance · free · no signup</span>
+          </header>
+          <div class="body">
+            <p class="muted" style="margin-top:0;font-size:0.8rem">
+              Educational long/flat strategies. Same engine Grapevine uses via <span class="mono">backtest</span>.
+            </p>
+            <div id="strategy-cards" class="strategy-cards"><div class="skeleton"></div></div>
+            <div class="form-grid" style="margin-top:1rem">
+              <div class="form-row">
+                <label for="st-symbol">Ticker</label>
+                <input id="st-symbol" value="AAPL" maxlength="12" />
+              </div>
+              <div class="form-row">
+                <label for="st-strategy">Strategy</label>
+                <select id="st-strategy"></select>
+              </div>
+              <div class="form-row">
+                <label for="st-start">Start</label>
+                <input id="st-start" type="date" />
+              </div>
+              <div class="form-row">
+                <label for="st-end">End</label>
+                <input id="st-end" type="date" />
+              </div>
+            </div>
+            <button class="btn primary" id="btn-strategy-run" type="button" style="width:100%;margin-top:0.75rem">
+              Run free backtest
+            </button>
+            <div id="st-result" class="strategy-result" style="margin-top:0.85rem"></div>
+            <canvas class="detail-chart tall" id="st-equity" width="720" height="160"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-charts" class="desk-tab-panel" hidden data-tour="charts">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Chart studio</h2>
+            <p class="page-lead">Inspectable pack — hover for OHLC, drag to zoom a region, scroll to zoom, double-click to reset.</p>
+          </div>
+        </header>
+        <section class="panel">
+          <header>
+            <h2>Load charts</h2>
+            <span class="muted mono">price · volume · RSI · MACD</span>
+          </header>
+          <div class="body">
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="cs-symbol">Ticker</label>
+                <input id="cs-symbol" value="AAPL" maxlength="12" />
+              </div>
+              <div class="form-row">
+                <label for="cs-start">Start</label>
+                <input id="cs-start" type="date" />
+              </div>
+              <div class="form-row">
+                <label for="cs-end">End</label>
+                <input id="cs-end" type="date" />
+              </div>
+              <div class="form-row" style="align-self:end">
+                <button class="btn primary" id="btn-chart-pack" type="button" style="width:100%">Load all charts</button>
+              </div>
+            </div>
+            <div class="inline" style="margin:0.35rem 0; gap:0.5rem; flex-wrap:wrap">
+              <button class="btn ghost active" type="button" data-cs-tool="inspect">Inspect</button>
+              <button class="btn ghost" type="button" data-cs-tool="trend">Trend</button>
+              <button class="btn ghost" type="button" data-cs-tool="hline">H-Line</button>
+              <button class="btn ghost" type="button" id="btn-cs-undo-draw">Undo</button>
+              <button class="btn ghost" type="button" id="btn-cs-clear-draw">Clear lines</button>
+              <button class="btn ghost" type="button" id="btn-cs-reset-zoom">Reset zoom</button>
+              <span class="muted" style="font-size:0.78rem">Draw on price panel · lines save per ticker</span>
+            </div>
+            <div id="cs-summary" class="muted" style="margin:0.65rem 0;font-size:0.8rem"></div>
+            <div class="chart-stack chart-host" id="cs-chart-host">
+              <div>
+                <div class="muted chart-label">Price + SMA 20/50/200</div>
+                <canvas id="cs-price" width="720" height="240"></canvas>
+              </div>
+              <div>
+                <div class="muted chart-label">Volume</div>
+                <canvas id="cs-vol" width="720" height="110"></canvas>
+              </div>
+              <div>
+                <div class="muted chart-label">RSI (14)</div>
+                <canvas id="cs-rsi" width="720" height="120"></canvas>
+              </div>
+              <div>
+                <div class="muted chart-label">MACD</div>
+                <canvas id="cs-macd" width="720" height="130"></canvas>
+              </div>
+              <div class="chart-inspect" id="cs-inspect" hidden></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-services" class="desk-tab-panel" hidden data-tour="services">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Services &amp; keys</h2>
+            <p class="page-lead">Keep Grapevine, MCP, and API credentials healthy — one service per section.</p>
+          </div>
+        </header>
+        <nav class="sub-tabs" aria-label="Services sections" data-subtab-group="services">
+          <button type="button" class="sub-tab active" data-sub-tab="ollama">Ollama</button>
+          <button type="button" class="sub-tab" data-sub-tab="mcp">MCP</button>
+          <button type="button" class="sub-tab" data-sub-tab="keys">API keys</button>
+        </nav>
+
+        <div class="sub-panel" data-sub-panel="services-ollama">
+          <p class="sub-hint">Local LLM behind Grapevine. Warm the model before long chat sessions.</p>
+          <section class="panel">
+            <header>
+              <h2>LLM (Ollama / Grapevine)</h2>
+              <span class="mono muted" id="svc-ollama-chip">—</span>
+            </header>
+            <div class="body">
+              <div class="inline">
+                <button class="btn" id="btn-ollama-status" type="button">Status</button>
+                <button class="btn primary" id="btn-ollama-warm" type="button">Warm / start model</button>
+                <button class="btn" id="btn-ollama-unload" type="button">Unload</button>
+                <button class="btn" id="btn-ollama-models" type="button">List models</button>
+              </div>
+              <pre class="svc-log mono" id="svc-ollama-log">—</pre>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="services-mcp" hidden>
+          <p class="sub-hint">
+            Local Infobroker MCP process for Cursor / tools. Start keeps it running under this desk;
+            Cursor also launches its own copy via <span class="mono">.cursor/mcp.json</span>.
+          </p>
+          <section class="panel">
+            <header>
+              <h2>MCP server</h2>
+              <span class="mono muted" id="svc-mcp-chip">—</span>
+            </header>
+            <div class="body">
+              <p class="muted" style="margin-top:0;font-size:0.78rem">
+                Config: <span class="mono">.cursor/mcp.json</span> · log: <span class="mono">data/mcp_server.log</span>
+              </p>
+              <div class="inline">
+                <button class="btn primary" id="btn-mcp-start" type="button">Start</button>
+                <button class="btn" id="btn-mcp-stop" type="button">Stop</button>
+                <button class="btn" id="btn-mcp-restart" type="button">Restart</button>
+                <button class="btn" id="btn-mcp-status" type="button">Status</button>
+              </div>
+              <pre class="svc-log mono" id="svc-mcp-log">—</pre>
+            </div>
+          </section>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="services-keys" hidden>
+          <p class="sub-hint">Sign up for missing providers, then paste keys in the modal.</p>
+          <section class="panel">
+            <header><h2>Acquire API keys</h2></header>
+            <div class="body">
+              <div id="acquire-keys" class="acquire-grid"><div class="skeleton"></div></div>
+              <button class="btn primary" id="btn-open-keys-from-svc" type="button" style="margin-top:0.75rem;width:100%">
+                Open keys modal
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="tab-settings" class="desk-tab-panel" hidden data-tour="settings">
+        <header class="page-intro">
+          <div>
+            <h2 class="page-title">Settings &amp; docs</h2>
+            <p class="page-lead">Project documentation — how data works, brokers, Grapevine, architecture, and repo files.</p>
+          </div>
+        </header>
+        <nav class="sub-tabs" aria-label="Settings sections" data-subtab-group="settings">
+          <button type="button" class="sub-tab active" data-sub-tab="docs">Docs</button>
+          <button type="button" class="sub-tab" data-sub-tab="about">About &amp; links</button>
+        </nav>
+
+        <div class="sub-panel" data-sub-panel="settings-docs">
+          <div class="docs-layout">
+            <aside class="docs-nav panel">
+              <header><h2>Topics</h2></header>
+              <div class="body" id="docs-nav"><div class="skeleton"></div></div>
+            </aside>
+            <article class="docs-article panel">
+              <header class="docs-article-head">
+                <h2 id="docs-title">Documentation</h2>
+                <span class="mono muted" id="docs-meta"></span>
+              </header>
+              <div class="body docs-content" id="docs-content">
+                <p class="muted">Select a topic on the left.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="settings-about" hidden>
+          <p class="sub-hint">Quick links and runtime health for this local desk.</p>
+          <div class="docs-about-grid">
+            <section class="panel">
+              <header><h2>Quick links</h2></header>
+              <div class="body docs-links">
+                <a class="btn" href="/docs" target="_blank" rel="noopener">OpenAPI /api docs</a>
+                <a class="btn" href="/api/health" target="_blank" rel="noopener">Health JSON</a>
+                <button type="button" class="btn" id="btn-settings-keys">API Keys modal</button>
+                <button type="button" class="btn" id="btn-settings-services">Services &amp; keys</button>
+                <button type="button" class="btn primary" id="btn-settings-data-doc">How data works</button>
+              </div>
+            </section>
+            <section class="panel">
+              <header><h2>Runtime</h2></header>
+              <div class="body">
+                <pre class="svc-log mono" id="settings-health-log">Loading…</pre>
+                <button type="button" class="btn" id="btn-settings-refresh-health" style="margin-top:0.5rem">Refresh health</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: ticket / blotter -->
+    <aside class="trade-column stack" data-tour="rail-trade">
+      <section class="panel" data-tour="order-ticket">
+        <header><h2>Order ticket</h2></header>
+        <div class="body">
+          <div id="order-banner" class="banner warn" hidden></div>
+          <div class="form-row">
+            <label for="ord-symbol">Symbol</label>
+            <input id="ord-symbol" maxlength="12" autocomplete="off" />
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="ord-side">Side</label>
+              <select id="ord-side">
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="ord-qty">Qty</label>
+              <input id="ord-qty" type="number" min="0.0001" step="any" value="1" />
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="ord-type">Order type</label>
+            <select id="ord-type">
+              <option value="market">Market</option>
+              <option value="limit">Limit</option>
+              <option value="stop">Stop</option>
+              <option value="stop_limit">Stop-limit</option>
+            </select>
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="ord-limit">Limit price</label>
+              <input id="ord-limit" type="number" step="any" placeholder="for limit" />
+            </div>
+            <div class="form-row">
+              <label for="ord-stop-entry">Stop price</label>
+              <input id="ord-stop-entry" type="number" step="any" placeholder="stop entry" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="ord-stop">Stop loss</label>
+              <input id="ord-stop" type="number" step="any" placeholder="protect (mkt)" />
+            </div>
+            <div class="form-row">
+              <label for="ord-tp">Take profit</label>
+              <input id="ord-tp" type="number" step="any" placeholder="optional" />
+            </div>
+          </div>
+          <p class="muted" style="font-size:0.7rem;margin:0 0 0.5rem">
+            Market + stop loss/TP places a bracket. Limit/stop use the prices above as entry.
+          </p>
+          <div class="inline" style="margin-bottom:0.65rem">
+            <button class="btn" id="btn-preview" type="button">Preview risk</button>
+            <button class="btn primary" id="btn-submit" type="button">Submit</button>
+          </div>
+          <ul class="checklist" id="order-checklist"></ul>
+        </div>
+      </section>
+
+      <section class="panel" data-tour="order-blotter">
+        <header>
+          <h2>Order blotter</h2>
+          <button class="btn ghost" id="btn-orders-refresh" type="button">Reload</button>
+        </header>
+        <div class="body">
+          <div id="orders-box" class="list-compact"><div class="skeleton"></div></div>
+        </div>
+      </section>
+
+      <section class="panel" data-tour="quick-backtest">
+        <header><h2>Backtest</h2></header>
+        <div class="body">
+          <div class="form-row">
+            <label for="bt-symbol">Symbol</label>
+            <input id="bt-symbol" value="AAPL" maxlength="12" />
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="bt-start">Start</label>
+              <input id="bt-start" type="date" />
+            </div>
+            <div class="form-row">
+              <label for="bt-end">End</label>
+              <input id="bt-end" type="date" />
+            </div>
+          </div>
+          <button class="btn primary" id="btn-backtest" type="button" style="width:100%">Run SMA crossover</button>
+          <div id="bt-result" class="muted" style="margin-top:0.75rem"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-tour="brokers">
+        <header><h2>Brokers</h2></header>
+        <div class="body" id="brokers-box"><div class="skeleton"></div></div>
+      </section>
+    </aside>
+
+    <!-- Grapevine desk coach -->
+    <aside class="assistant-column stack" data-tour="assistant">
+      <section class="panel assistant-panel grapevine-panel">
+        <header class="gv-header">
+          <div class="gv-identity">
+            <div class="gv-avatar" aria-hidden="true">
+              <span class="gv-leaf"></span>
+              <span class="gv-eye"></span>
+            </div>
+            <div>
+              <h2>Grapevine</h2>
+              <div class="gv-tagline">Desk coach · points, circles, teaches</div>
+            </div>
+          </div>
+          <span class="mono muted" id="assistant-model">arriella-grapevine</span>
+        </header>
+        <div class="body">
+          <div class="gv-desk-pulse" id="gv-desk-pulse" title="Live desk context Grapevine is watching">
+            <span class="gv-pulse-dot" id="gv-pulse-dot"></span>
+            <span class="mono" id="gv-pulse-text">Watching desk…</span>
+          </div>
+          <div class="inline">
+            <button class="btn primary" id="btn-assistant-hunt" type="button" title="Hunt setups and highlight them on the desk">Find trades</button>
+            <button class="btn" id="btn-assistant-shot" type="button" title="Send a screenshot of the desk">Send view</button>
+            <button class="btn ghost" id="btn-coach-stop" type="button" title="Dismiss coach overlay" hidden>Stop coach</button>
+          </div>
+          <div class="inline" style="flex-wrap:wrap">
+            <button class="btn ghost" id="btn-asst-ollama-warm" type="button" title="Warm Grapevine">LLM warm</button>
+            <button class="btn ghost" id="btn-asst-mcp-restart" type="button" title="Restart MCP">MCP restart</button>
+            <button class="btn ghost" id="btn-asst-goto-services" type="button">Services</button>
+          </div>
+          <label class="inline muted" style="font-size:0.75rem;gap:0.4rem">
+            <input type="checkbox" id="auto-hunt" />
+            Auto-hunt every 5 min
+          </label>
+          <div class="assistant-chat" id="assistant-chat">
+            <div class="msg assistant gv-bubble">
+              <div class="who">Grapevine</div>
+              I’m your desk Clippy — I watch open markets, gainers, and losers. Ask “how do I trade?” and I’ll circle the widgets. Paper only until you’re ready.
+            </div>
+            <div class="gv-followups" aria-label="Suggested follow-ups">
+              <div class="gv-followups-label">Suggested</div>
+              <div class="gv-followups-row">
+                <button type="button" class="gv-followup" data-followup="Is the market open?">Is the market open?</button>
+                <button type="button" class="gv-followup" data-followup="Show top gainers">Show top gainers</button>
+                <button type="button" class="gv-followup" data-followup="Show my watchlist prices">Show my watchlist prices</button>
+                <button type="button" class="gv-followup" data-followup="How do I trade?">How do I trade?</button>
+              </div>
+            </div>
+          </div>
+          <div class="inline gv-compose">
+            <input id="assistant-input" placeholder="Ask how to trade, or circle today’s gainers…" autocomplete="off" />
+            <button class="btn primary" id="btn-assistant-send" type="button">Send</button>
+          </div>
+          <div>
+            <div class="muted" style="margin-bottom:0.3rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase">Action stream</div>
+            <div class="action-feed" id="action-feed"><div class="empty">No tool calls yet</div></div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Lesson detail modal (multi-page) -->
+  <div class="modal-backdrop" id="lesson-modal" role="dialog" aria-modal="true" aria-labelledby="lesson-title">
+    <div class="modal lesson-modal">
+      <header>
+        <div>
+          <h2 id="lesson-title">Lesson</h2>
+          <div class="lesson-meta" id="lesson-meta"></div>
+        </div>
+        <div class="inline">
+          <button class="btn ghost" id="btn-lesson-close" type="button">Close</button>
+        </div>
+      </header>
+      <div class="lesson-progress" id="lesson-progress"></div>
+      <div class="body lesson-body" id="lesson-body">
+        <div class="skeleton"></div>
+      </div>
+      <footer class="lesson-footer">
+        <button class="btn" id="btn-page-prev" type="button">← Page</button>
+        <span class="mono muted" id="lesson-page-label">1/1</span>
+        <button class="btn primary" id="btn-page-next" type="button">Page →</button>
+        <button class="btn ghost" id="btn-lesson-prev" type="button">Prev lesson</button>
+        <button class="btn ghost" id="btn-lesson-next" type="button">Next lesson</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Keys modal -->
+  <div class="modal-backdrop" id="keys-modal" role="dialog" aria-modal="true" aria-labelledby="keys-title">
+    <div class="modal">
+      <header>
+        <h2 id="keys-title">API keys &amp; providers</h2>
+        <button class="btn ghost" id="btn-keys-close" type="button">Close</button>
+      </header>
+      <div class="body">
+        <p class="muted" style="margin-top:0">
+          Secrets are stored in local <span class="mono">.env</span>. The UI never shows full keys — leave a field blank to keep the existing value.
+        </p>
+        <div class="key-links" id="key-links-box">
+          <div class="muted" style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase">Get API keys</div>
+          <div class="row-links">
+            <a href="https://app.alpaca.markets/signup" target="_blank" rel="noopener">Alpaca signup</a>
+            <a href="https://app.alpaca.markets/paper/dashboard/overview" target="_blank" rel="noopener">Alpaca keys</a>
+            <a href="https://public.com/api/docs" target="_blank" rel="noopener">Public API</a>
+            <a href="https://developer.tradier.com/" target="_blank" rel="noopener">Tradier developer</a>
+            <a href="https://finnhub.io/register" target="_blank" rel="noopener">Finnhub free key</a>
+            <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener">Alpha Vantage key</a>
+          </div>
+        </div>
+        <div id="keys-banner" class="banner ok" hidden></div>
+        <div id="missing-keys-banner" class="banner warn" hidden></div>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="set-broker">Execution broker</label>
+            <select id="set-broker">
+              <option value="paper">Paper (local)</option>
+              <option value="alpaca">Alpaca</option>
+              <option value="public">Public</option>
+              <option value="tradier">Tradier</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="set-data">Market data</label>
+            <select id="set-data">
+              <option value="yahoo">yfinance (default)</option>
+              <option value="finnhub">Finnhub</option>
+              <option value="alphavantage">Alpha Vantage</option>
+              <option value="auto">Auto cascade</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;color:var(--amber)">Alpaca</h3>
+        <div class="form-row">
+          <label for="set-alpaca-key">API key <span class="secret-status" id="st-alpaca-key"></span></label>
+          <input id="set-alpaca-key" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <div class="form-row">
+          <label for="set-alpaca-secret">API secret <span class="secret-status" id="st-alpaca-secret"></span></label>
+          <input id="set-alpaca-secret" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <label class="muted" style="display:flex;gap:0.4rem;align-items:center;margin-bottom:0.8rem">
+          <input type="checkbox" id="set-alpaca-paper" checked /> Use Alpaca paper account
+        </label>
+
+        <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;color:var(--amber)">Public</h3>
+        <div class="form-row">
+          <label for="set-public-secret">Personal secret <span class="secret-status" id="st-public"></span></label>
+          <input id="set-public-secret" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <div class="form-row">
+          <label for="set-public-acct">Account ID (optional) <span class="secret-status" id="st-public-acct"></span></label>
+          <input id="set-public-acct" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <p class="muted" style="font-size:0.72rem;margin:-0.35rem 0 0.75rem">Keys stay on this machine in <span class="mono">.env</span> (gitignored). Settings API is localhost-only.</p>
+
+        <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;color:var(--amber)">Tradier</h3>
+        <div class="form-row">
+          <label for="set-tradier-token">Access token <span class="secret-status" id="st-tradier"></span></label>
+          <input id="set-tradier-token" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <div class="form-row">
+          <label for="set-tradier-acct">Account ID <span class="secret-status" id="st-tradier-acct"></span></label>
+          <input id="set-tradier-acct" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <label class="muted" style="display:flex;gap:0.4rem;align-items:center;margin-bottom:0.8rem">
+          <input type="checkbox" id="set-tradier-sandbox" checked /> Use Tradier sandbox
+        </label>
+
+        <h3 style="font-size:0.9rem;margin:1rem 0 0.5rem;color:var(--amber)">Market data keys (optional)</h3>
+        <div class="form-row">
+          <label for="set-finnhub">Finnhub <span class="secret-status" id="st-finnhub"></span></label>
+          <input id="set-finnhub" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+        <div class="form-row">
+          <label for="set-av">Alpha Vantage <span class="secret-status" id="st-av"></span></label>
+          <input id="set-av" type="password" autocomplete="off" placeholder="Paste to update" />
+        </div>
+
+        <div class="inline" style="justify-content:flex-end;margin-top:0.5rem">
+          <button class="btn" id="btn-keys-cancel" type="button">Cancel</button>
+          <button class="btn primary" id="btn-keys-save" type="button">Save keys</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Site tour: spotlight + bottom sheet (never covered by page widgets) -->
+  <div id="tour-root" class="tour-root" hidden aria-live="polite">
+    <div class="tour-overlay" id="tour-overlay" aria-hidden="true"></div>
+    <div class="tour-spotlight" id="tour-spotlight" aria-hidden="true"></div>
+    <div class="tour-sheet" id="tour-sheet" role="dialog" aria-modal="true" aria-labelledby="tour-title">
+      <div class="tour-sheet-head">
+        <span class="tour-step mono" id="tour-step">1 / 1</span>
+        <button type="button" class="btn ghost" id="btn-tour-done" title="End tour">Done</button>
+      </div>
+      <h3 id="tour-title">Welcome</h3>
+      <p id="tour-body"></p>
+      <div class="tour-actions">
+        <button type="button" class="btn" id="btn-tour-back">Back</button>
+        <button type="button" class="btn primary" id="btn-tour-next">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grapevine coach: circle / arrow / highlight on desk widgets -->
+  <div id="coach-root" class="coach-root" hidden aria-live="polite">
+    <div class="coach-dim" id="coach-dim" aria-hidden="true"></div>
+    <div class="coach-ring" id="coach-ring" aria-hidden="true"></div>
+    <div class="coach-arrow" id="coach-arrow" aria-hidden="true"></div>
+    <div class="coach-bubble" id="coach-bubble" role="status">
+      <div class="coach-bubble-head">
+        <span class="coach-who">Grapevine</span>
+        <span class="mono coach-step" id="coach-step-label">1 / 1</span>
+        <button type="button" class="btn ghost coach-dismiss" id="btn-coach-dismiss" title="Dismiss">×</button>
+      </div>
+      <h3 id="coach-title">Look here</h3>
+      <p id="coach-message"></p>
+      <div class="coach-bubble-actions">
+        <button type="button" class="btn" id="btn-coach-skip">Skip</button>
+        <button type="button" class="btn primary" id="btn-coach-next">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="/static/charts.js?v=31"></script>
+  <script src="/static/app.js?v=31"></script>
+</body>
+</html>

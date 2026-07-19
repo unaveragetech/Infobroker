@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "infobroker": {
+      "command": "python",
+      "args": ["-m", "infobroker.mcp_server"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}

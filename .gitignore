@@ -1,0 +1,48 @@
+# Local / secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Runtime data & local ledgers
+data/*
+!data/.gitkeep
+users.json
+*.png
+!docs/**/*.png
+
+# Caches / logs (legacy + desk)
+stock_cache.json
+stock_check.log
+ticker_log.txt
+failed_tickers.txt
+incomplete_tickers.json
+stock_symbols_check.csv
+*.log
+test.archive
+
+# Editor / local tooling
+.cursor/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# OS
+Desktop.ini
