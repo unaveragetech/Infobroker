@@ -24,11 +24,15 @@ build/
 data/*
 !data/.gitkeep
 users.json
-# Ignore PNGs everywhere except the README / USAGE gallery
+# Ignore media everywhere except README / USAGE gallery assets
 *.png
+*.webm
+*.mp4
+docs/video_raw/
 !docs/
 !docs/images/
 !docs/images/**/*.png
+!docs/demo.mp4
 
 # Caches / logs (legacy + desk)
 stock_cache.json

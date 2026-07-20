@@ -116,23 +116,48 @@ Full architecture diagrams: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 2. Pull **Grapevine** on Ollama if you want the full coach experience  
 3. Read [docs/USAGE.md](docs/USAGE.md) for tab insights, closed-market prices, and model requirements  
 
-### UI gallery
+### Demo video
 
-Markets — live board and universe:
+Short walkthrough of Markets → Chart studio (AAPL pack) → Tour → Trading / Grapevine (~1 min):
+
+<video controls width="100%" poster="docs/images/desk-charts.png">
+  <source src="docs/demo.mp4" type="video/mp4" />
+</video>
+
+[Watch / download demo.mp4](docs/demo.mp4) · re-record with desk running: `python scripts/record_demo.py`
+
+### UI screenshots
+
+<details>
+<summary><strong>Show screenshots</strong> — Markets, Trading, Chart studio, Tour, Grapevine</summary>
+
+<br/>
+
+**Markets** — live board and universe
 
 ![Infobroker Markets tab](docs/images/desk-markets.png)
 
-Trading — bid / ask board:
+**Trading** — bid / ask board
 
 ![Infobroker Trading tab](docs/images/desk-trading.png)
 
-Guided tour (click **Tour** after you start the desk):
+**Chart studio** — price + SMA (AAPL)
+
+![Infobroker Chart studio](docs/images/desk-charts.png)
+
+**Chart studio** — volume · RSI · MACD
+
+![Infobroker chart indicators](docs/images/desk-charts-indicators.png)
+
+**Guided tour** — click **Tour** after you start the desk
 
 ![Infobroker guided tour](docs/images/desk-tour.png)
 
-Grapevine desk coach:
+**Grapevine** — desk coach
 
 ![Infobroker Grapevine sidebar](docs/images/desk-grapevine.png)
+
+</details>
 
 ---
 

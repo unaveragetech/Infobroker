@@ -38,6 +38,14 @@ The guided tour walks the Markets board, Trading, Portfolio, Learning, Strategie
 
 **Insight:** Stay on **paper** until you understand the order ticket and risk checklist. Live brokers are opt-in via env / API Keys.
 
+### Chart studio — price, volume, RSI, MACD
+
+![Infobroker Chart studio](images/desk-charts.png)
+
+![Infobroker chart indicators](images/desk-charts-indicators.png)
+
+Load a ticker + date range → **Load all charts**. Hover for OHLC, drag to zoom, draw trend / H-lines on the price panel.
+
 ### Guided tour overlay
 
 ![Infobroker guided tour](images/desk-tour.png)
