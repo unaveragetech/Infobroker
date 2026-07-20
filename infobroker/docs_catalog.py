@@ -234,6 +234,25 @@ exchanges.md
 - Watchlist stored locally via watchlist module
 """,
     },
+    "rate-limits": {
+        "title": "Rate limits & avoidance",
+        "group": "Data",
+        "body": """# Rate limits & how Infobroker avoids them
+
+Free Yahoo / Finnhub / Alpha Vantage tiers punish aggressive polling. Infobroker is built around **caches and rotation**.
+
+## Strategies
+
+1. **Universe cache** — rotating batches (~160 symbols / ~35s) into `data/universe.json`
+2. **Shared tick cache** — ~0.85s when US open, ~12s when closed
+3. **Bulk Yahoo first**, per-symbol only on misses
+4. **Cascade** Yahoo → Finnhub → Alpha Vantage (AV never for full universe)
+5. **Grapevine light path** — cache prices; opportunity scan cached ~3 min
+6. **Retries with backoff** — no tight spin loops
+
+Full detail with diagrams: open the **Rate limits (repo)** page in this docs list, or `docs/RATE_LIMITS.md`.
+""",
+    },
     "env-safety": {
         "title": "Environment & safety",
         "group": "Reference",
@@ -277,6 +296,9 @@ _FILE_DOCS: list[tuple[str, str, str, Path]] = [
     ("mcp-md", "MCP (repo file)", "Project files", ROOT / "docs" / "MCP.md"),
     ("data-md", "Data deep-dive (repo)", "Project files", ROOT / "docs" / "DATA.md"),
     ("architecture-md", "Architecture (repo)", "Project files", ROOT / "docs" / "ARCHITECTURE.md"),
+    ("rate-limits-md", "Rate limits (repo)", "Project files", ROOT / "docs" / "RATE_LIMITS.md"),
+    ("donate-md", "Donate (repo)", "Project files", ROOT / "DONATE.md"),
+    ("license-md", "LICENSE (SDUC)", "Project files", ROOT / "LICENSE"),
     ("exchanges-md", "Exchanges notes", "Project files", ROOT / "exchanges.md"),
 ]
 

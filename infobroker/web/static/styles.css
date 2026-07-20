@@ -2004,6 +2004,20 @@ body.live-focus .live-tile {
 }
 .docs-links .btn { text-decoration: none; }
 #settings-health-log { max-height: 280px; }
+
+.donate-panel .donate-body {
+  max-width: 36rem;
+}
+.donate-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-width: 12rem;
+  margin-top: 0.35rem;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.95rem;
+}
 .acquire-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

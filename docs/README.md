@@ -1,16 +1,35 @@
 # Infobroker documentation
 
-Technical reference for the Infobroker desk. The same content is browsable in the UI under **Settings → Docs**.
+Technical reference for the Infobroker desk. The same content is browsable under **Settings → Docs**.
 
 | Doc | Topic |
 |-----|--------|
-| [DATA.md](DATA.md) | How market data, universe cache, and closed-session prices work |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Full stack + mermaid diagrams |
+| [DATA.md](DATA.md) | Market data, universe cache, closed-session prices |
+| [RATE_LIMITS.md](RATE_LIMITS.md) | Provider quotas and how Infobroker avoids them |
 | [BROKERS.md](BROKERS.md) | Free execution brokers + market-data providers |
 | [MCP.md](MCP.md) | Grapevine assistant + MCP server for Cursor |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Package layout and request path |
 | [../exchanges.md](../exchanges.md) | Exchange reference notes |
-| [../README.md](../README.md) | Quick start and feature overview |
+| [../README.md](../README.md) | Setup scripts and feature overview |
+| [../DONATE.md](../DONATE.md) | PayPal support link |
+| [../LICENSE](../LICENSE) | SDUC License v1.1 |
 | [mcp.example.json](mcp.example.json) | Safe Cursor MCP fragment (no machine paths) |
+
+## Setup
+
+```powershell
+# Windows
+powershell -ExecutionPolicy Bypass -File .\setup.ps1
+.\.venv\Scripts\Activate.ps1
+python -m infobroker.web.app
+```
+
+```bash
+# macOS / Linux
+bash setup.sh
+source .venv/bin/activate
+python -m infobroker.web.app
+```
 
 ## OpenAPI
 
@@ -20,6 +39,10 @@ JSON catalog: `GET /api/docs` · page: `GET /api/docs/{id}`
 
 ## Secrets
 
-- Copy [`.env.example`](../.env.example) → `.env` locally
-- **Never commit `.env`, `users.json`, or `data/*` ledgers/caches**
-- API keys are edited in the desk **API Keys** modal (localhost-only settings API)
+- Copy [`.env.example`](../.env.example) → `.env` locally  
+- **Never commit `.env`, `users.json`, or `data/*` ledgers/caches**  
+- API keys: desk **API Keys** modal (localhost-only settings API)  
+
+## Support
+
+[Donate via PayPal](https://www.paypal.com/donate/?hosted_button_id=2RXWCC28FJ79N)

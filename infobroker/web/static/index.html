@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/styles.css?v=31" />
+  <link rel="stylesheet" href="/static/styles.css?v=32" />
 </head>
 <body>
   <header class="topbar" data-tour="topbar">
@@ -922,6 +922,7 @@
         <nav class="sub-tabs" aria-label="Settings sections" data-subtab-group="settings">
           <button type="button" class="sub-tab active" data-sub-tab="docs">Docs</button>
           <button type="button" class="sub-tab" data-sub-tab="about">About &amp; links</button>
+          <button type="button" class="sub-tab" data-sub-tab="donate">Donate</button>
         </nav>
 
         <div class="sub-panel" data-sub-panel="settings-docs">
@@ -953,6 +954,8 @@
                 <button type="button" class="btn" id="btn-settings-keys">API Keys modal</button>
                 <button type="button" class="btn" id="btn-settings-services">Services &amp; keys</button>
                 <button type="button" class="btn primary" id="btn-settings-data-doc">How data works</button>
+                <button type="button" class="btn" id="btn-settings-rate-doc">Rate limits</button>
+                <button type="button" class="btn" id="btn-settings-goto-donate">Donate</button>
               </div>
             </section>
             <section class="panel">
@@ -963,6 +966,32 @@
               </div>
             </section>
           </div>
+        </div>
+
+        <div class="sub-panel" data-sub-panel="settings-donate" hidden>
+          <p class="sub-hint">Support Infobroker development — voluntary, no purchase of extra license rights.</p>
+          <section class="panel donate-panel">
+            <header><h2>Donate</h2></header>
+            <div class="body donate-body">
+              <p>
+                If the desk helps you learn markets or paper trade, you can support continued work with a PayPal donation.
+              </p>
+              <a
+                class="btn primary donate-cta"
+                id="btn-paypal-donate"
+                href="https://www.paypal.com/donate/?hosted_button_id=2RXWCC28FJ79N"
+                target="_blank"
+                rel="noopener"
+              >Donate via PayPal</a>
+              <p class="muted mono" style="margin-top:0.75rem;font-size:0.72rem">
+                hosted_button_id=2RXWCC28FJ79N
+              </p>
+              <p class="muted" style="margin-top:1rem;font-size:0.8rem">
+                Licensed under SDUC v1.1 — see Settings → Docs → LICENSE, or the repo
+                <span class="mono">LICENSE</span> / <span class="mono">DONATE.md</span>.
+              </p>
+            </div>
+          </section>
         </div>
       </div>
     </section>
@@ -1299,7 +1328,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="/static/charts.js?v=31"></script>
-  <script src="/static/app.js?v=31"></script>
+  <script src="/static/charts.js?v=32"></script>
+  <script src="/static/app.js?v=32"></script>
 </body>
 </html>

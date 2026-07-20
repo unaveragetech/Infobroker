@@ -2614,6 +2614,11 @@
       switchDeskTab("settings", "docs");
       openDoc("data-pipeline").catch((e) => toast(e.message));
     });
+    $("btn-settings-rate-doc")?.addEventListener("click", () => {
+      switchDeskTab("settings", "docs");
+      openDoc("rate-limits").catch(() => openDoc("rate-limits-md").catch((e) => toast(e.message)));
+    });
+    $("btn-settings-goto-donate")?.addEventListener("click", () => switchDeskTab("settings", "donate"));
     $("btn-settings-refresh-health")?.addEventListener("click", () => loadSettingsAbout());
     $("assistant-chat")?.querySelectorAll("[data-followup]").forEach((btn) => {
       btn.addEventListener("click", () => {
