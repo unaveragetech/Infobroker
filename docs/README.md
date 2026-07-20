@@ -4,6 +4,7 @@ Technical reference for the Infobroker desk. The same content is browsable under
 
 | Doc | Topic |
 |-----|--------|
+| [USAGE.md](USAGE.md) | **Start here after launch** — Tour, UI screenshots, Grapevine / model requirements, desk insights |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full stack + mermaid diagrams |
 | [DATA.md](DATA.md) | Market data, universe cache, closed-session prices |
 | [RATE_LIMITS.md](RATE_LIMITS.md) | Provider quotas and how Infobroker avoids them |

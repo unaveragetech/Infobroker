@@ -75,6 +75,7 @@ from infobroker.universe import (
 from infobroker.watchlist import add_symbol, get_watchlist, list_symbols, remove_symbol, validate_symbol
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+DOCS_IMAGES_DIR = Path(__file__).resolve().parents[2] / "docs" / "images"
 
 _LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
 
@@ -105,6 +106,8 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Infobroker", version="0.8.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+if DOCS_IMAGES_DIR.is_dir():
+    app.mount("/docs-images", StaticFiles(directory=str(DOCS_IMAGES_DIR)), name="docs_images")
 
 
 class OrderBody(BaseModel):

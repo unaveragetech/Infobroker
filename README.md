@@ -28,7 +28,7 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1
 python -m infobroker.web.app
 ```
 
-Open **http://127.0.0.1:8000/**
+Open **http://127.0.0.1:8000/** — then click **Tour** in the top bar to get oriented. Full walkthrough: [docs/USAGE.md](docs/USAGE.md).
 
 ### macOS / Linux
 
@@ -40,6 +40,8 @@ source .venv/bin/activate
 python -m infobroker.web.app
 ```
 
+Open **http://127.0.0.1:8000/** and start with **Tour**. See [docs/USAGE.md](docs/USAGE.md).
+
 The setup script:
 
 1. Creates `.venv`  
@@ -49,14 +51,17 @@ The setup script:
 
 **Never commit `.env`.** Put API keys only in local `.env` or the desk **API Keys** modal.
 
-### Optional: Grapevine (assistant)
+### Grapevine (highly advised)
+
+The desk coach was **designed for Grapevine**. Install Ollama, then:
 
 ```bash
-# Install Ollama, then:
 ollama pull arriella-grapevine
 ```
 
-Without Ollama, the desk still works; Grapevine fast-path answers (prices, gainers, cash) keep working.
+If you use another model, it should support **chat completion**, **image summary**, **image → text**, **thinking** (multi-step tool plans), and **reductive** (short) output. Details: [docs/USAGE.md](docs/USAGE.md#model-grapevine-strongly-recommended).
+
+Without Ollama, the desk still works; fast-path answers (prices, gainers, cash) keep working.
 
 ### Optional: TA-Lib note
 
@@ -105,10 +110,37 @@ Full architecture diagrams: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
+## After you run it
+
+1. Open the desk → click **Tour** (do this first)  
+2. Pull **Grapevine** on Ollama if you want the full coach experience  
+3. Read [docs/USAGE.md](docs/USAGE.md) for tab insights, closed-market prices, and model requirements  
+
+### UI gallery
+
+Markets — live board and universe:
+
+![Infobroker Markets tab](docs/images/desk-markets.png)
+
+Trading — bid / ask board:
+
+![Infobroker Trading tab](docs/images/desk-trading.png)
+
+Guided tour (click **Tour** after you start the desk):
+
+![Infobroker guided tour](docs/images/desk-tour.png)
+
+Grapevine desk coach:
+
+![Infobroker Grapevine sidebar](docs/images/desk-grapevine.png)
+
+---
+
 ## Documentation
 
 | Doc | What it covers |
 |-----|----------------|
+| [docs/USAGE.md](docs/USAGE.md) | **Tour-first usage, UI screenshots, Grapevine / model requirements** |
 | [docs/README.md](docs/README.md) | Doc index |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack + mermaid diagrams |
 | [docs/DATA.md](docs/DATA.md) | Market data pipeline |

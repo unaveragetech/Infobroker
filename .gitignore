@@ -24,8 +24,11 @@ build/
 data/*
 !data/.gitkeep
 users.json
+# Ignore PNGs everywhere except the README / USAGE gallery
 *.png
-!docs/**/*.png
+!docs/
+!docs/images/
+!docs/images/**/*.png
 
 # Caches / logs (legacy + desk)
 stock_cache.json

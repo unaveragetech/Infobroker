@@ -28,6 +28,10 @@ Infobroker is a **local trading desk**: learn chart/risk skills, research US equ
 | Grapevine | Ollama assistant (`arriella-grapevine`) with desk tools |
 | MCP server | Optional Cursor tool bridge (`python -m infobroker.mcp_server`) |
 
+## First run
+
+After `python -m infobroker.web.app`, open the desk and click **Tour**. Full usage, screenshots, and model requirements: open **Usage & insights (repo)** in this list, or `docs/USAGE.md`.
+
 ## Desk tabs
 
 - **Markets** — live board, universe, movers, scanner, symbol detail
@@ -38,9 +42,52 @@ Infobroker is a **local trading desk**: learn chart/risk skills, research US equ
 - **Services & keys** — Ollama, MCP process, API key signup
 - **Settings** — this documentation and technical reference
 
+## Grapevine
+
+Designed for **arriella-grapevine**. Alternates need chat completion, image summary, image→text, thinking, and reductive output.
+
 ## OpenAPI
 
 Interactive API schema: [http://127.0.0.1:8000/docs](/docs)
+""",
+    },
+    "usage": {
+        "title": "Usage & first tour",
+        "group": "Start here",
+        "body": """# Usage & first tour
+
+## After you start the desk
+
+1. Open `http://127.0.0.1:8000/`
+2. Click **Tour** in the top bar (or in the Grapevine sidebar)
+
+The guided tour is the recommended onboarding path. Re-run anytime.
+
+## Grapevine (highly advised)
+
+```bash
+ollama pull arriella-grapevine
+```
+
+Grapevine was designed for this desk. If you use another model it should support:
+
+- Chat completion
+- Image summary
+- Image → text
+- Thinking (multi-step tool plans)
+- Reductive (short) output
+
+Without Ollama, fast-path answers (prices, gainers, cash, open/closed) still work.
+
+## Quick first session
+
+1. Finish **Tour**
+2. Confirm `broker: paper`
+3. Add watchlist tickers → **Refresh**
+4. Try Grapevine chips (“Show my watchlist prices”)
+5. Open **Learning → Tutor**
+
+Screenshots and deeper tab insights: open **Usage (repo file)** in this docs list (`docs/USAGE.md`).
 """,
     },
     "data-pipeline": {
@@ -292,6 +339,7 @@ Copy `.env.example` → `.env`. **Never commit secrets.**
 _FILE_DOCS: list[tuple[str, str, str, Path]] = [
     ("readme", "README (repo)", "Project files", ROOT / "README.md"),
     ("docs-index", "Docs index", "Project files", ROOT / "docs" / "README.md"),
+    ("usage-md", "Usage (repo file)", "Project files", ROOT / "docs" / "USAGE.md"),
     ("brokers-md", "Brokers & data APIs", "Project files", ROOT / "docs" / "BROKERS.md"),
     ("mcp-md", "MCP (repo file)", "Project files", ROOT / "docs" / "MCP.md"),
     ("data-md", "Data deep-dive (repo)", "Project files", ROOT / "docs" / "DATA.md"),
@@ -340,11 +388,28 @@ def _md_to_html(md: str) -> str:
         table_rows = []
         in_table = False
 
+    def _doc_img_src(src: str) -> str:
+        raw = src.strip()
+        if raw.startswith(("http://", "https://", "/")):
+            return raw
+        # docs/USAGE.md → images/foo.png  (served at /docs-images/)
+        name = raw.replace("\\", "/").split("/")[-1]
+        return f"/docs-images/{name}"
+
     def _inline(s: str) -> str:
         s = html.escape(s)
         s = re.sub(r"`([^`]+)`", r'<code class="docs-code">\1</code>', s)
         s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
         s = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", s)
+        # Images before links so ![alt](url) is not treated as a bare link
+        s = re.sub(
+            r"!\[([^\]]*)\]\(([^)]+)\)",
+            lambda m: (
+                f'<img class="docs-img" src="{html.escape(_doc_img_src(m.group(2)))}" '
+                f'alt="{html.escape(m.group(1))}" loading="lazy" />'
+            ),
+            s,
+        )
         s = re.sub(
             r"\[([^\]]+)\]\(([^)]+)\)",
             r'<a href="\2" target="_blank" rel="noopener">\1</a>',
@@ -379,6 +444,19 @@ def _md_to_html(md: str) -> str:
 
         if not line.strip():
             close_lists()
+            continue
+
+        img_only = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", line.strip())
+        if img_only:
+            close_lists()
+            alt = html.escape(img_only.group(1))
+            src = html.escape(_doc_img_src(img_only.group(2)))
+            out.append(
+                f'<figure class="docs-figure"><img class="docs-img" src="{src}" alt="{alt}" '
+                f'loading="lazy" />'
+                + (f"<figcaption>{alt}</figcaption>" if img_only.group(1) else "")
+                + "</figure>"
+            )
             continue
 
         h = re.match(r"^(#{1,4})\s+(.*)$", line)

@@ -2,13 +2,15 @@
 
 ## In-app assistant (Grapevine)
 
-The desk right sidebar runs **Arriella Grapevine** via local Ollama:
+The desk right sidebar runs **Arriella Grapevine** via local Ollama. Grapevine was **designed for Infobroker** — using it is highly advised. After you start the desk, click **Tour** first; see [USAGE.md](USAGE.md) for screenshots and model-capability requirements.
 
 ```bash
 ollama list   # expect arriella-grapevine:latest (or your INFOBROKER_OLLAMA_MODEL)
 python -m infobroker.web.app
-# http://127.0.0.1:8000/
+# http://127.0.0.1:8000/  → click Tour
 ```
+
+Alternate models need chat completion, image summary, image→text, thinking, and reductive output.
 
 ### Behavior
 
