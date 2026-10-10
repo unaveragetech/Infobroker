@@ -7,6 +7,10 @@
 
 ---
 
+[![unaveragetech/infobroker, explained in a one-minute video](https://gitdiagram.com/api/video/file?username=unaveragetech&repo=infobroker&format=poster)](https://gitdiagram.com/unaveragetech/infobroker/video)
+
+---
+
 ## Why this repo
 
 Infobroker is not just a yfinance script. It ships a full **desk UI** with:
